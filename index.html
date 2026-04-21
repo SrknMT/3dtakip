@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D İş Takip ERP</title>
+    <title>3D İş Takip ERP - V26</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☁️</text></svg>">
-    
     <link rel="apple-touch-icon" href="logo.jpg">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mete 3D">
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -53,7 +53,10 @@
         .sync-status-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; padding: 8px 12px; border-radius: 8px; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; transition: 0.3s; }
         .sync-status-indicator.connected { background: #d4edda; border-color: #c3e6cb; color: #155724; }
         .stock-warning-row { background-color: #fdedec !important; } .stock-warning-row td { border-bottom: 1px solid #f5b7b1; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; padding: 10px; box-sizing: border-box; } .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; } .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; } .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d; padding: 0; min-height: auto; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; padding: 10px; box-sizing: border-box; } .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; } .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; } .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d; padding: 0; min-height: auto; }
+        
+        .product-image-thumbnail { width: 100%; height: 120px; object-fit: contain; background: #f8f9fa; border-radius: 6px; margin-bottom: 10px; border: 1px solid #eee; }
+        .product-code-badge { background: #ecf0f1; color: var(--secondary); padding: 3px 6px; border-radius: 4px; font-size: 11px; font-family: monospace; display: inline-block; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -81,10 +84,7 @@
             <div class="card">
                 <h3 style="margin-bottom: 10px;">Yeni Hammadde Tanımla</h3>
                 <div class="form-group"><label>Adı (Örn: PLA Kırmızı / Halka)</label><input type="text" id="new-mat-name"></div>
-                <div class="grid-2">
-                    <div class="form-group"><label>Birim Tipi</label><select id="new-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div>
-                    <div class="form-group"><label>Kritik Uyarı Limiti</label><input type="number" id="new-mat-limit" placeholder="Örn: 500"></div>
-                </div>
+                <div class="grid-2"><div class="form-group"><label>Birim Tipi</label><select id="new-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div><div class="form-group"><label>Kritik Uyarı Limiti</label><input type="number" id="new-mat-limit" placeholder="Örn: 500"></div></div>
                 <button onclick="createNewMaterial()" style="width:100%">Kataloğa Ekle</button>
             </div>
             <div class="card" style="border-top: 4px solid var(--success);">
@@ -98,44 +98,48 @@
                 <h3 style="color:var(--danger); margin-bottom:5px;">🗑️ Genel Fire Bildir</h3>
                 <div class="form-group"><label>Toplam Atık Gramajı</label><input type="number" id="waste-qty" placeholder="Örn: 800 (Gr)"></div>
                 <div class="form-group"><label>Açıklama</label><input type="text" id="waste-desc" placeholder="Örn: Nisan Ayı Fireleri"></div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-danger" onclick="addGlobalWasteLog()" style="flex:2;">Fireyi İşle</button>
-                    <button class="btn-outline" onclick="openWasteHistory()" style="flex:1;">🕒 Geçmiş</button>
-                </div>
+                <div style="display:flex; gap:10px;"><button class="btn-danger" onclick="addGlobalWasteLog()" style="flex:2;">Fireyi İşle</button><button class="btn-outline" onclick="openWasteHistory()" style="flex:1;">🕒 Geçmiş</button></div>
             </div>
         </div>
         <div class="card table-responsive">
-            <table><thead><tr><th>Hammadde Adı</th><th>Birim</th><th>Güncel Stok</th><th>Uyarı Sınırı</th><th>Ort. Maliyet</th><th>İşlemler</th></tr></thead><tbody id="inventory-list"></tbody></table>
+            <table>
+                <thead><tr><th>Hammadde Adı</th><th>Birim</th><th>Güncel Stok</th><th>Uyarı Sınırı</th><th>Ort. Maliyet</th><th>İşlemler</th></tr></thead>
+                <tbody id="inventory-list"></tbody>
+            </table>
         </div>
     </div>
 
     <div id="tab-products" style="display: none;">
-        <div class="card" id="recipe-builder-card">
-            <h3 id="recipe-form-title">Yeni Ürün Reçetesi Oluştur</h3>
-            <div class="grid-2"><div class="form-group"><label>Ürün Adı</label><input type="text" id="prod-name"></div><div class="form-group"><label>Standart Satış Fiyatı (₺)</label><input type="number" id="prod-price"></div></div>
-            <div id="recipe-container"><label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler (Birimlere Dikkat Edin)</label></div>
+        <div class="card" id="recipe-builder-card" style="border-left: 4px solid var(--accent);">
+            <h3 id="recipe-form-title">Yeni Ürün / Reçete Oluştur</h3>
+            <div class="grid-4">
+                <div class="form-group"><label>Ürün Adı *</label><input type="text" id="prod-name"></div>
+                <div class="form-group"><label>Satış Fiyatı (₺) *</label><input type="number" id="prod-price"></div>
+                <div class="form-group"><label>Ürün Kodu (Opsiyonel)</label><input type="text" id="prod-code" placeholder="Örn: M3D-EJD"></div>
+                <div class="form-group"><label>Instagram Linki (Opsiyonel)</label><input type="text" id="prod-ig-link" placeholder="https://instagram.com/..."></div>
+            </div>
+            <div class="form-group" style="background:#f8f9fa; padding:10px; border-radius:8px; border:1px solid #e1e8ed;">
+                <label>📷 Ürün Fotoğrafı (Opsiyonel)</label>
+                <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                    <input type="file" id="prod-image-upload" accept="image/*" style="flex:1; border:none; background:white; padding:5px;">
+                    <button class="btn-danger" id="remove-img-btn" onclick="removeTempImage()" style="display:none; padding:5px 10px; font-size:12px;">Resmi Kaldır</button>
+                    <img id="image-preview" src="" style="display:none; width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc;">
+                </div>
+                <p style="font-size:11px; color:#7f8c8d; margin-top:5px; margin-bottom:0;">*Sistem veritabanını korumak için fotoğrafı otomatik olarak küçülterek kaydeder.</p>
+            </div>
+            <div id="recipe-container" style="margin-top:15px;"><label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label></div>
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap:wrap;"><button class="btn-warning" onclick="addRecipeRow()">+ Malzeme Ekle</button><button class="btn-success" id="save-prod-btn" onclick="saveProduct()">📦 Ürünü Kaydet</button><button class="btn-outline" id="cancel-edit-btn" onclick="cancelEdit()" style="display: none;">İptal</button></div>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
             <h3 style="margin: 0; color: var(--primary);">Ürün Kataloğu ve Stoklar</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;"><input type="text" id="product-search-input" placeholder="🔍 Ürün Ara..." oninput="refreshUI()" style="padding: 10px 12px; border: 1px solid #ccd1d9; border-radius: 8px; font-size: 14px; min-width: 220px;"><button class="btn-outline" onclick="toggleProductView()">🔄 Görünüm (Kart/Liste)</button></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;"><input type="text" id="product-search-input" placeholder="🔍 Kod veya İsim Ara..." oninput="refreshUI()" style="padding: 10px 12px; border: 1px solid #ccd1d9; border-radius: 8px; font-size: 14px; min-width: 220px;"><button class="btn-outline" onclick="toggleProductView()">🔄 Görünüm (Kart/Liste)</button></div>
         </div>
         <div id="product-list-container"></div>
     </div>
 
     <div id="tab-queue" style="display: none;">
-        <div class="card" style="margin-bottom:15px; padding:15px;">
-            <div class="grid-3" style="align-items:flex-end;">
-                <div class="form-group" style="margin:0;"><label>Hızlı Görev Ekle</label><select id="q-add-select"></select></div>
-                <div class="form-group" style="margin:0;"><label>Adet</label><input type="number" id="q-add-qty" value="1"></div>
-                <button onclick="addToQueueFromSelect()" style="height:44px;">Pano'ya At</button>
-            </div>
-        </div>
-        <div class="kanban-board">
-            <div class="kanban-col"><h4 style="color:var(--secondary)">⏳ Bekleyenler</h4><div id="kb-todo"></div></div>
-            <div class="kanban-col"><h4 style="color:var(--warning)">⚙️ Yazıcıda (Üretimde)</h4><div id="kb-progress"></div></div>
-            <div class="kanban-col"><h4 style="color:var(--success)">✅ Tamamlandı</h4><div id="kb-done"></div></div>
-        </div>
+        <div class="card" style="margin-bottom:15px; padding:15px;"><div class="grid-3" style="align-items:flex-end;"><div class="form-group" style="margin:0;"><label>Hızlı Görev Ekle</label><select id="q-add-select"></select></div><div class="form-group" style="margin:0;"><label>Adet</label><input type="number" id="q-add-qty" value="1"></div><button onclick="addToQueueFromSelect()" style="height:44px;">Pano'ya At</button></div></div>
+        <div class="kanban-board"><div class="kanban-col"><h4 style="color:var(--secondary)">⏳ Bekleyenler</h4><div id="kb-todo"></div></div><div class="kanban-col"><h4 style="color:var(--warning)">⚙️ Yazıcıda (Üretimde)</h4><div id="kb-progress"></div></div><div class="kanban-col"><h4 style="color:var(--success)">✅ Tamamlandı</h4><div id="kb-done"></div></div></div>
         <h3 style="margin-top:30px; color:var(--secondary);">🗄️ Üretim Geçmişi (Arşiv)</h3>
         <div class="card table-responsive"><table><thead><tr><th>Tarih</th><th>Ürün / Sipariş</th><th>Adet</th><th>Durum</th></tr></thead><tbody id="kb-archive-list"></tbody></table></div>
     </div>
@@ -143,52 +147,44 @@
     <div id="tab-locations" style="display: none;">
         <div class="grid-2">
             <div class="card"><h3 style="margin-bottom:10px;">Yeni Bayi Tanımla</h3><div class="form-group"><input type="text" id="new-loc-name" placeholder="Örn: X Kafe"></div><button onclick="createNewLocation()" style="width:100%">Vitrin Ekle</button></div>
-            <div class="card">
-                <h3 style="margin-bottom:10px;">Bayi İşlem Kaydı</h3>
-                <div class="grid-2"><div class="form-group"><input type="date" id="loc-log-date"></div><div class="form-group"><select id="loc-select"></select></div></div>
-                <div class="form-group"><select id="loc-action-type"><option value="SEND">📦 Merkezden Bayiye Gönder</option><option value="SALE">💰 Bayide Satıldı (Gelir İşle)</option><option value="RETURN">🔄 Bayiden İade Al</option></select></div>
-                <div class="form-group"><select id="loc-prod-select" onchange="autoFillPrice()"></select></div>
-                <div class="grid-2"><div class="form-group"><input type="number" id="loc-qty" placeholder="Adet"></div><div class="form-group"><input type="number" id="loc-price" placeholder="₺ Fiyat"></div></div>
-                <button class="btn-purple" onclick="addLocationLog()" style="width:100%">İşlemi Kaydet</button>
-            </div>
+            <div class="card"><h3 style="margin-bottom:10px;">Bayi İşlem Kaydı</h3><div class="grid-2"><div class="form-group"><input type="date" id="loc-log-date"></div><div class="form-group"><select id="loc-select"></select></div></div><div class="form-group"><select id="loc-action-type"><option value="SEND">📦 Merkezden Bayiye Gönder</option><option value="SALE">💰 Bayide Satıldı (Gelir İşle)</option><option value="RETURN">🔄 Bayiden İade Al</option></select></div><div class="form-group"><select id="loc-prod-select" onchange="autoFillPrice()"></select></div><div class="grid-2"><div class="form-group"><input type="number" id="loc-qty" placeholder="Adet"></div><div class="form-group"><input type="number" id="loc-price" placeholder="₺ Fiyat"></div></div><button class="btn-purple" onclick="addLocationLog()" style="width:100%">İşlemi Kaydet</button></div>
         </div>
         <div id="locations-container"></div>
     </div>
 
     <div id="tab-custom" style="display: none;">
-        <div class="card">
-            <h3>Yeni Müşteri Siparişi Gir</h3>
-            <div class="grid-4"><div class="form-group"><label>Müşteri Adı/Instagram</label><input type="text" id="b2c-name"></div><div class="form-group"><label>Açıklama</label><input type="text" id="b2c-desc"></div><div class="form-group"><label>Fiyat (₺)</label><input type="number" id="b2c-price"></div><div class="form-group"><label>Kapora (₺)</label><input type="number" id="b2c-deposit" value="0"></div></div>
-            <button class="btn-purple" onclick="addCustomOrder()">Siparişi Kaydet & Pano'ya Ekle</button>
-        </div>
+        <div class="card"><h3>Yeni Müşteri Siparişi Gir</h3><div class="grid-4"><div class="form-group"><label>Müşteri Adı/Instagram</label><input type="text" id="b2c-name"></div><div class="form-group"><label>Açıklama</label><input type="text" id="b2c-desc"></div><div class="form-group"><label>Fiyat (₺)</label><input type="number" id="b2c-price"></div><div class="form-group"><label>Kapora (₺)</label><input type="number" id="b2c-deposit" value="0"></div></div><button class="btn-purple" onclick="addCustomOrder()">Siparişi Kaydet & Pano'ya Ekle</button></div>
         <div class="card table-responsive"><table><thead><tr><th>Tarih</th><th>Müşteri</th><th>Sipariş Detayı</th><th>Fiyat</th><th>Kapora</th><th>Kalan</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="custom-orders-list"></tbody></table></div>
     </div>
 
     <div id="tab-finance" style="display: none;">
         <h2 style="margin-top: 0;">Nakit Akışı (Gerçekleşen)</h2>
-        <div class="grid-4" style="margin-bottom: 20px;">
-            <div class="stat-card red"><div class="title">Hammadde Alımı (Gider)</div><div class="value" id="fin-total-expense">0 ₺</div></div>
-            <div class="stat-card green"><div class="title">Satışlar (Gelir)</div><div class="value" id="fin-total-revenue">0 ₺</div></div>
-            <div class="stat-card blue"><div class="title">Net Nakit (Kasa)</div><div class="value" id="fin-net-cash">0 ₺</div></div>
-            <div class="stat-card dark"><div class="title">Fire / Çöp Zararı</div><div class="value" id="fin-waste-loss" style="color:#ff7979">0 ₺</div></div>
-        </div>
+        <div class="grid-4" style="margin-bottom: 20px;"><div class="stat-card red"><div class="title">Hammadde Alımı (Gider)</div><div class="value" id="fin-total-expense">0 ₺</div></div><div class="stat-card green"><div class="title">Satışlar (Gelir)</div><div class="value" id="fin-total-revenue">0 ₺</div></div><div class="stat-card blue"><div class="title">Net Nakit (Kasa)</div><div class="value" id="fin-net-cash">0 ₺</div></div><div class="stat-card dark"><div class="title">Fire / Çöp Zararı</div><div class="value" id="fin-waste-loss" style="color:#ff7979">0 ₺</div></div></div>
         <h2>Varlıklar ve Beklentiler</h2>
-        <div class="grid-4" style="margin-bottom: 25px;">
-            <div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Depo Hammadde Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-raw-value">0 ₺</div></div>
-            <div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Basılmış Ürün Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--danger);" id="fin-prod-cost">0 ₺</div></div>
-            <div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Bekleyen Toplam Ciro</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-prod-value">0 ₺</div></div>
-            <div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Gelecek Net Kâr</h3><div style="font-size: 22px; font-weight: bold; color: var(--success);" id="fin-prod-profit">0 ₺</div></div>
-        </div>
+        <div class="grid-4" style="margin-bottom: 25px;"><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Depo Hammadde Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-raw-value">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Basılmış Ürün Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--danger);" id="fin-prod-cost">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Bekleyen Toplam Ciro</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-prod-value">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Gelecek Net Kâr</h3><div style="font-size: 22px; font-weight: bold; color: var(--success);" id="fin-prod-profit">0 ₺</div></div></div>
         <h2 style="border-top: 2px solid #eee; padding-top: 20px;">📈 Satış ve Stok Analizi</h2>
-        <div class="grid-2">
-            <div class="card"><h3 style="color:var(--success); margin-top:0;">🏆 En Çok Satan 5 Ürün</h3><div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Toplam Satış</th></tr></thead><tbody id="analytics-best-sellers"></tbody></table></div></div>
-            <div class="card"><h3 style="color:var(--danger); margin-top:0;">🛑 Ölü Stok (Hareketsiz) 5 Ürün</h3><div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Toplam Stok</th><th>Satış</th></tr></thead><tbody id="analytics-dead-stock"></tbody></table></div></div>
-        </div>
+        <div class="grid-2"><div class="card"><h3 style="color:var(--success); margin-top:0;">🏆 En Çok Satan 5 Ürün</h3><div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Toplam Satış</th></tr></thead><tbody id="analytics-best-sellers"></tbody></table></div></div><div class="card"><h3 style="color:var(--danger); margin-top:0;">🛑 Ölü Stok (Hareketsiz) 5 Ürün</h3><div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Toplam Stok</th><th>Satış</th></tr></thead><tbody id="analytics-dead-stock"></tbody></table></div></div></div>
     </div>
 </div>
 
 <div id="editMatModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0;">Hammadde Düzenle</h3><button class="close-btn" onclick="document.getElementById('editMatModal').style.display='none'">✖</button></div><input type="hidden" id="edit-mat-id"><div class="form-group"><label>Hammadde Adı</label><input type="text" id="edit-mat-name"></div><div class="grid-2"><div class="form-group"><label>Birim Tipi</label><select id="edit-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div><div class="form-group"><label>Kritik Uyarı Limiti</label><input type="number" id="edit-mat-limit"></div></div><button class="btn-success" onclick="saveEditedMaterial()" style="width:100%; margin-top:10px;">Kaydet</button></div></div>
-<div id="wasteHistoryModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header"><h3 style="margin:0;">🗑️ Fire / Atık Geçmişi</h3><button class="close-btn" onclick="document.getElementById('wasteHistoryModal').style.display='none'">✖</button></div><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Miktar</th><th>Zarar</th><th>İptal</th></tr></thead><tbody id="waste-history-list"></tbody></table></div></div></div>
+<div id="wasteHistoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0;">🗑️ Fire / Atık Geçmişi</h3><button class="close-btn" onclick="document.getElementById('wasteHistoryModal').style.display='none'">✖</button></div><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Miktar</th><th>Zarar</th><th>İptal</th></tr></thead><tbody id="waste-history-list"></tbody></table></div></div></div>
+
+<div id="materialHistoryModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 id="mat-history-title" style="margin:0; color:var(--primary);">📦 Stok Hareketleri</h3>
+            <button class="close-btn" onclick="document.getElementById('materialHistoryModal').style.display='none'">✖</button>
+        </div>
+        <p style="font-size:12px; color:#7f8c8d; margin-top:0;">Hammaddeyi silmek istiyorsanız önce bu listedeki tüm geçmiş kayıtları silmelisiniz.</p>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Tarih</th><th>İşlem Tipi</th><th>Miktar</th><th>Tutar (Alım)</th><th>İşlem</th></tr></thead>
+                <tbody id="mat-history-list"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script>
     // ==========================================================================
@@ -211,73 +207,27 @@
     // VERİTABANI DEĞİŞKENİ VE BULUTTAN ÇEKME İŞLEMİ
     // ==========================================================================
     let db = { materials: [], stockLogs: [], products: [], locations: [], locationLogs: [], productionLogs: [], wasteLogs: [], customOrders: [], queue: [] };
+    let tempProductImage = ""; 
+    let currentHistoryMatId = null; // Hangi hammaddenin geçmişine baktığımızı tutar
     
     let productViewMode = 'card'; 
     document.getElementById('log-date').valueAsDate = new Date(); 
     document.getElementById('loc-log-date').valueAsDate = new Date();
 
-    // SAYFA AÇILDIĞINDA VERİLERİ BULUTTAN OTOMATİK ÇEK
     dbRef.get().then((doc) => {
-        if (doc.exists) {
-            const cloudData = doc.data();
-            db = { ...db, ...cloudData }; 
-        } else {
-            saveDB(); 
-        }
-        document.getElementById('sync-status').innerHTML = '🟢 Buluta Bağlı';
-        document.getElementById('sync-status').classList.add('connected');
-        
-        const localDataString = localStorage.getItem('3d_tracker_db_v3');
-        if(localDataString) {
-            const localData = JSON.parse(localDataString);
-            if(localData.materials && localData.materials.length > 0 && db.materials.length === 0) {
-                if(confirm("Bilgisayarınızda (önceki sürümlerden kalan) kayıtlı veriler bulundu. Bunları yeni bulut sistemine aktarmak ister misiniz?")) {
-                    db = localData;
-                    saveDB();
-                }
-            }
-        }
-        
+        if (doc.exists) { db = { ...db, ...doc.data() }; } else { saveDB(); }
+        document.getElementById('sync-status').innerHTML = '🟢 Buluta Bağlı'; document.getElementById('sync-status').classList.add('connected');
         refreshUI();
-        
-        // BULUTTAKİ DEĞİŞİKLİKLERİ CANLI DİNLE
-        dbRef.onSnapshot((doc) => {
-            if (doc.exists) {
-                const cloudData = doc.data();
-                if(JSON.stringify(db) !== JSON.stringify(cloudData)) {
-                    db = { ...db, ...cloudData };
-                    refreshUI();
-                }
-            }
-        });
+        dbRef.onSnapshot((doc) => { if (doc.exists) { const cloudData = doc.data(); if(JSON.stringify(db) !== JSON.stringify(cloudData)) { db = { ...db, ...cloudData }; refreshUI(); } } });
+    }).catch((error) => { console.error(error); document.getElementById('sync-status').innerHTML = '🔴 Bağlantı Hatası'; });
 
-    }).catch((error) => {
-        console.error("Firebase Bağlantı Hatası:", error);
-        document.getElementById('sync-status').innerHTML = '🔴 Bağlantı Hatası';
-        alert("Buluta bağlanılamadı! Lütfen internetinizi kontrol edin.");
-    });
-
-    // ==========================================================================
-    // VERİYİ BULUTA KAYDETME FONKSİYONU
-    // ==========================================================================
     function saveDB() {
-        const syncStatus = document.getElementById('sync-status');
-        syncStatus.innerHTML = '🔄 Kaydediliyor...';
-        syncStatus.classList.remove('connected');
-        
+        const syncStatus = document.getElementById('sync-status'); syncStatus.innerHTML = '🔄 Kaydediliyor...'; syncStatus.classList.remove('connected');
         localStorage.setItem('3d_tracker_db_v3', JSON.stringify(db));
-
-        dbRef.set(db).then(() => {
-            syncStatus.innerHTML = '🟢 Buluta Kaydedildi';
-            syncStatus.classList.add('connected');
-        }).catch((error) => {
-            console.error("Kaydetme Hatası: ", error);
-            syncStatus.innerHTML = '🔴 Kayıt Hatası! (İnterneti kontrol et)';
-            syncStatus.style.background = '#fadbd8'; syncStatus.style.color = '#c0392b';
-        });
+        dbRef.set(db).then(() => { syncStatus.innerHTML = '🟢 Buluta Kaydedildi'; syncStatus.classList.add('connected'); }).catch(() => { syncStatus.innerHTML = '🔴 Kayıt Hatası!'; syncStatus.style.background = '#fadbd8'; syncStatus.style.color = '#c0392b'; });
     }
 
-    function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); a.download = "3D_Bulut_Yedegi_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); a.remove(); }
+    function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); a.download = "Mete3D_Bulut_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); a.remove(); }
 
     // ==========================================================================
     // UYGULAMA MANTIK KODLARI
@@ -287,41 +237,127 @@
     function toggleProductView() { productViewMode = productViewMode === 'card' ? 'list' : 'card'; refreshUI(); }
 
     function createNewMaterial() { const n = document.getElementById('new-mat-name').value; const unit = document.getElementById('new-mat-unit').value; const limit = parseInt(document.getElementById('new-mat-limit').value) || 0; if(n) { db.materials.push({id: 'MAT-'+Date.now(), name: n, unit: unit, alertLimit: limit}); saveDB(); document.getElementById('new-mat-name').value = ''; document.getElementById('new-mat-limit').value = ''; refreshUI(); } }
-    function addStockLog() { const m = document.getElementById('log-mat-select').value; const q = parseFloat(document.getElementById('log-qty').value); const p = parseFloat(document.getElementById('log-price').value); const d = document.getElementById('log-date').value; if(m && q && d) { db.stockLogs.push({id: 'LOG-'+Date.now(), matId: m, date: d, type: 'IN', qty: q, price: p}); saveDB(); document.getElementById('log-qty').value = ''; refreshUI(); } }
+    function addStockLog() { const m = document.getElementById('log-mat-select').value; const q = parseFloat(document.getElementById('log-qty').value); const p = parseFloat(document.getElementById('log-price').value); const d = document.getElementById('log-date').value; if(m && q && d) { db.stockLogs.push({id: 'LOG-'+Date.now(), matId: m, date: d, type: 'IN', qty: q, price: p}); saveDB(); document.getElementById('log-qty').value = ''; document.getElementById('log-price').value = ''; refreshUI(); } }
     
-    function addGlobalWasteLog() {
-        const q = parseFloat(document.getElementById('waste-qty').value);
-        const desc = document.getElementById('waste-desc').value || 'Genel Atık/Fire';
-        if(q > 0) {
-            let totalGrams = 0; let totalValue = 0;
-            db.materials.forEach(m => { if(m.unit !== 'adet') { const st = calculateMaterialStats(m.id); totalGrams += st.stock; totalValue += (st.stock * st.avgCost); } });
-            let globalAvgCost = totalGrams > 0 ? (totalValue / totalGrams) : 0;
-            let costOfWaste = globalAvgCost * q;
-            db.wasteLogs.push({id: 'WST-'+Date.now(), date: new Date().toISOString().slice(0,10), qty: q, cost: costOfWaste, desc: desc});
-            saveDB(); document.getElementById('waste-qty').value = ''; document.getElementById('waste-desc').value = '';
-            alert(`${q} gr Genel Fire kaydedildi. Tahmini Zarar: ${costOfWaste.toFixed(2)}₺`); refreshUI();
+    // YENİ EKLENEN: HAMMADDE GEÇMİŞİ VE SİLME İŞLEMLERİ
+    function openMaterialHistory(matId) {
+        currentHistoryMatId = matId;
+        const mat = db.materials.find(m => m.id === matId);
+        if(!mat) return;
+        document.getElementById('mat-history-title').innerText = `📦 ${mat.name} - Hareket Geçmişi`;
+        
+        const tbody = document.getElementById('mat-history-list');
+        tbody.innerHTML = '';
+        const logs = db.stockLogs.filter(l => l.matId === matId).slice().reverse(); // En yeni en üstte
+        
+        if(logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Bu hammaddenin henüz hiçbir alım/kullanım kaydı yok.</td></tr>';
+        } else {
+            logs.forEach(l => {
+                const typeLabel = l.type === 'IN' 
+                    ? '<span style="color:var(--success);font-weight:bold;">🟢 Yeni Alım</span>' 
+                    : '<span style="color:var(--danger);font-weight:bold;">🔴 Üretim (Çıkış)</span>';
+                const priceLabel = l.type === 'IN' ? `${(l.price||0).toFixed(2)} ₺` : '-';
+                
+                tbody.innerHTML += `<tr>
+                    <td>${l.date}</td>
+                    <td>${typeLabel}</td>
+                    <td><b>${l.qty} ${mat.unit||'gr'}</b></td>
+                    <td>${priceLabel}</td>
+                    <td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteStockLog('${l.id}')">🗑️ Sil</button></td>
+                </tr>`;
+            });
+        }
+        document.getElementById('materialHistoryModal').style.display = 'flex';
+    }
+
+    function deleteStockLog(logId) {
+        if(confirm("Bu hareketi silmek istediğinize emin misiniz? Silinirse sistem hammadde miktarını ve kâr oranını tekrar hesaplayacaktır.")) {
+            db.stockLogs = db.stockLogs.filter(l => l.id !== logId);
+            saveDB();
+            if(currentHistoryMatId) openMaterialHistory(currentHistoryMatId); // Tabloyu yenile
+            refreshUI(); // Arka plandaki stok ekranını yenile
         }
     }
 
-    function openWasteHistory() {
-        const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = '';
-        if(db.wasteLogs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Henüz fire kaydı bulunmuyor.</td></tr>'; } 
-        else { db.wasteLogs.slice().reverse().forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.qty} gr</b></td><td style="color:var(--danger)">${w.cost.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteWasteLog('${w.id}')">🗑️</button></td></tr>`; }); }
-        document.getElementById('wasteHistoryModal').style.display = 'flex';
-    }
-
-    function deleteWasteLog(id) { if(confirm("Bu fire kaydını silmek istiyor musunuz? Kasadaki zarar iade edilecektir.")) { db.wasteLogs = db.wasteLogs.filter(w => w.id !== id); saveDB(); openWasteHistory(); refreshUI(); } }
+    function addGlobalWasteLog() { const q = parseFloat(document.getElementById('waste-qty').value); const desc = document.getElementById('waste-desc').value || 'Genel Atık/Fire'; if(q > 0) { let totalGrams = 0; let totalValue = 0; db.materials.forEach(m => { if(m.unit !== 'adet') { const st = calculateMaterialStats(m.id); totalGrams += st.stock; totalValue += (st.stock * st.avgCost); } }); let globalAvgCost = totalGrams > 0 ? (totalValue / totalGrams) : 0; let costOfWaste = globalAvgCost * q; db.wasteLogs.push({id: 'WST-'+Date.now(), date: new Date().toISOString().slice(0,10), qty: q, cost: costOfWaste, desc: desc}); saveDB(); document.getElementById('waste-qty').value = ''; document.getElementById('waste-desc').value = ''; alert(`${q} gr Genel Fire kaydedildi.`); refreshUI(); } }
+    function openWasteHistory() { const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = ''; if(db.wasteLogs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Henüz fire kaydı bulunmuyor.</td></tr>'; } else { db.wasteLogs.slice().reverse().forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.qty} gr</b></td><td style="color:var(--danger)">${w.cost.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteWasteLog('${w.id}')">🗑️</button></td></tr>`; }); } document.getElementById('wasteHistoryModal').style.display = 'flex'; }
+    function deleteWasteLog(id) { if(confirm("İptal etmek istiyor musunuz?")) { db.wasteLogs = db.wasteLogs.filter(w => w.id !== id); saveDB(); openWasteHistory(); refreshUI(); } }
     function calculateMaterialStats(matId) { let s = 0, c = 0, p = 0; db.stockLogs.forEach(l => { if(l.matId === matId) { if(l.type === 'IN') { s += l.qty; c += (l.price || 0); p += l.qty; } else { s -= l.qty; } } }); return { stock: s, avgCost: p > 0 ? (c / p) : 0 }; }
     function editMaterial(id) { const mat = db.materials.find(m => m.id === id); if(!mat) return; document.getElementById('edit-mat-id').value = id; document.getElementById('edit-mat-name').value = mat.name; document.getElementById('edit-mat-unit').value = mat.unit || 'gr'; document.getElementById('edit-mat-limit').value = mat.alertLimit || 0; document.getElementById('editMatModal').style.display = 'flex'; }
-    function saveEditedMaterial() { const id = document.getElementById('edit-mat-id').value; const name = document.getElementById('edit-mat-name').value; const unit = document.getElementById('edit-mat-unit').value; const limit = parseInt(document.getElementById('edit-mat-limit').value) || 0; if(!name) return alert("Hammadde adı boş olamaz!"); const mat = db.materials.find(m => m.id === id); if(mat) { mat.name = name.trim(); mat.unit = unit; mat.alertLimit = limit; saveDB(); refreshUI(); document.getElementById('editMatModal').style.display = 'none'; } }
-    function deleteMaterial(id) { const usedInLogs = db.stockLogs.some(l => l.matId === id); const usedInRecipes = db.products.some(p => p.recipe.some(r => r.matId === id)); if (usedInLogs || usedInRecipes) { alert("⚠️ DİKKAT: Bu hammadde geçmişte kullanıldığı için silinemez."); return; } if (confirm("Bu hammaddeyi silmek istediğinize emin misiniz?")) { db.materials = db.materials.filter(m => m.id !== id); saveDB(); refreshUI(); } }
-    function updateRecipeInputUnit(selectElem) { const selectedOpt = selectElem.options[selectElem.selectedIndex]; const unit = selectedOpt.getAttribute('data-unit') || 'gr'; selectElem.parentElement.nextElementSibling.querySelector('input').placeholder = `Miktar (${unit})`; }
+    function saveEditedMaterial() { const id = document.getElementById('edit-mat-id').value; const name = document.getElementById('edit-mat-name').value; const unit = document.getElementById('edit-mat-unit').value; const limit = parseInt(document.getElementById('edit-mat-limit').value) || 0; if(!name) return; const mat = db.materials.find(m => m.id === id); if(mat) { mat.name = name.trim(); mat.unit = unit; mat.alertLimit = limit; saveDB(); refreshUI(); document.getElementById('editMatModal').style.display = 'none'; } }
+    
+    // SİLME İŞLEMİ GÜNCELLENDİ (Neden silinmediğini açıklıyor)
+    function deleteMaterial(id) { 
+        const usedInLogs = db.stockLogs.some(l => l.matId === id);
+        const usedInRecipes = db.products.some(p => p.recipe.some(r => r.matId === id));
+        
+        if (usedInLogs || usedInRecipes) { 
+            alert("⚠️ BU HAMMADDE SİLİNEMEZ!\n\nÇünkü geçmişte bu hammaddeye ait alım yapılmış veya bir ürünün reçetesine eklenmiş.\n\nNasıl Silebilirim?\n1. Yanındaki '🕒' butonuna basıp tüm geçmiş hareketlerini silin.\n2. Eğer bir üründe kullanılıyorsa, o ürünün reçetesinden bu hammaddeyi çıkarın."); 
+            return; 
+        } 
+        
+        if (confirm("Bu hammaddeyi tamamen silmek istediğinize emin misiniz?")) { 
+            db.materials = db.materials.filter(m => m.id !== id); 
+            saveDB(); 
+            refreshUI(); 
+        } 
+    }
+    
+    function updateRecipeInputUnit(selectElem) { const unit = selectElem.options[selectElem.selectedIndex].getAttribute('data-unit') || 'gr'; selectElem.parentElement.nextElementSibling.querySelector('input').placeholder = `Miktar (${unit})`; }
+    function addRecipeRow(m='', q='') { const c = document.getElementById('recipe-container'); const r = 'row-' + Date.now() + Math.random().toString(36).substr(2,5); let o = '<option value="" data-unit="gr">-Malzeme-</option>'; let sUnit = 'gr'; db.materials.forEach(mat => { const u = mat.unit || 'gr'; if(mat.id === m) sUnit = u; o += `<option value="${mat.id}" data-unit="${u}" ${mat.id === m ? 'selected' : ''}>${mat.name} (${u})</option>`; }); c.insertAdjacentHTML('beforeend', `<div class="recipe-row" id="${r}"><div class="form-group"><select class="recipe-mat-select" onchange="updateRecipeInputUnit(this)">${o}</select></div><div class="form-group"><input type="number" class="recipe-qty-input" placeholder="Miktar (${sUnit})" value="${q}"></div><button class="btn-danger" onclick="document.getElementById('${r}').remove()">X</button></div>`); }
 
-    function addRecipeRow(m='', q='') { const c = document.getElementById('recipe-container'); const r = 'row-' + Date.now() + Math.random().toString(36).substr(2,5); let o = '<option value="" data-unit="gr">-Malzeme Seç-</option>'; let selectedUnit = 'gr'; db.materials.forEach(mat => { const u = mat.unit || 'gr'; if(mat.id === m) selectedUnit = u; o += `<option value="${mat.id}" data-unit="${u}" ${mat.id === m ? 'selected' : ''}>${mat.name} (${u})</option>`; }); c.insertAdjacentHTML('beforeend', `<div class="recipe-row" id="${r}"><div class="form-group"><select class="recipe-mat-select" onchange="updateRecipeInputUnit(this)">${o}</select></div><div class="form-group"><input type="number" class="recipe-qty-input" placeholder="Miktar (${selectedUnit})" value="${q}"></div><button class="btn-danger" onclick="document.getElementById('${r}').remove()">X</button></div>`); }
-    function saveProduct() { const n = document.getElementById('prod-name').value; const p = parseFloat(document.getElementById('prod-price').value) || 0; if(!n) return; let r = []; document.querySelectorAll('.recipe-row').forEach(row => { const m = row.querySelector('.recipe-mat-select').value; const q = parseFloat(row.querySelector('.recipe-qty-input').value); if(m && q) r.push({matId: m, qty: q}); }); if(r.length === 0) return; if(editingProductId) { const pr = db.products.find(x => x.id === editingProductId); pr.name = n; pr.sellPrice = p; pr.recipe = r; cancelEdit(); } else { db.products.push({id: 'PROD-'+Date.now(), name: n, sellPrice: p, recipe: r, finishedStock: 0}); document.getElementById('prod-name').value=''; document.getElementById('prod-price').value=''; document.getElementById('recipe-container').innerHTML=''; addRecipeRow(); } saveDB(); refreshUI(); }
-    function editProduct(id) { const pr=db.products.find(x=>x.id===id); if(!pr)return; editingProductId=id; document.getElementById('prod-name').value=pr.name; document.getElementById('prod-price').value=pr.sellPrice; const c=document.getElementById('recipe-container'); c.innerHTML=''; pr.recipe.forEach(i=>addRecipeRow(i.matId, i.qty)); document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); }
-    function cloneProduct(id) { const pr = db.products.find(x => x.id === id); if(!pr) return; editingProductId = null; document.getElementById('prod-name').value = pr.name + " (Kopya)"; document.getElementById('prod-price').value = pr.sellPrice; const c = document.getElementById('recipe-container'); c.innerHTML = ''; pr.recipe.forEach(i => addRecipeRow(i.matId, i.qty)); document.getElementById('cancel-edit-btn').style.display = 'inline-block'; window.scrollTo({top: 0}); }
-    function cancelEdit() { editingProductId = null; document.getElementById('prod-name').value = ''; document.getElementById('prod-price').value = ''; document.getElementById('recipe-container').innerHTML = ''; addRecipeRow(); document.getElementById('cancel-edit-btn').style.display = 'none'; }
+    // GÖRSEL SIKIŞTIRMA SİSTEMİ
+    document.getElementById('prod-image-upload').addEventListener('change', function(e) {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 250; const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                tempProductImage = canvas.toDataURL('image/jpeg', 0.6); 
+                document.getElementById('image-preview').src = tempProductImage; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block';
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(file);
+    });
+
+    function removeTempImage() { tempProductImage = ""; document.getElementById('prod-image-upload').value = ""; document.getElementById('image-preview').style.display = 'none'; document.getElementById('image-preview').src = ""; document.getElementById('remove-img-btn').style.display = 'none'; }
+
+    function saveProduct() { 
+        const n = document.getElementById('prod-name').value; const p = parseFloat(document.getElementById('prod-price').value) || 0; 
+        const c = document.getElementById('prod-code').value; const ig = document.getElementById('prod-ig-link').value;
+        if(!n) return alert("Ürün adı girmelisiniz!"); 
+        let r = []; document.querySelectorAll('.recipe-row').forEach(row => { const m = row.querySelector('.recipe-mat-select').value; const q = parseFloat(row.querySelector('.recipe-qty-input').value); if(m && q) r.push({matId: m, qty: q}); }); 
+        if(r.length === 0) return alert("En az 1 malzeme eklemelisiniz!"); 
+        
+        if(editingProductId) { 
+            const pr = db.products.find(x => x.id === editingProductId); 
+            pr.name = n; pr.sellPrice = p; pr.code = c; pr.igLink = ig; pr.recipe = r; 
+            if(tempProductImage !== "") pr.image = tempProductImage;
+            cancelEdit(); 
+        } else { 
+            db.products.push({id: 'PROD-'+Date.now(), name: n, sellPrice: p, code: c, igLink: ig, image: tempProductImage, recipe: r, finishedStock: 0}); 
+            cancelEdit(); 
+        } 
+        saveDB(); refreshUI(); 
+    }
+
+    function editProduct(id) { 
+        const pr=db.products.find(x=>x.id===id); if(!pr)return; editingProductId=id; 
+        document.getElementById('prod-name').value=pr.name; document.getElementById('prod-price').value=pr.sellPrice; 
+        document.getElementById('prod-code').value=pr.code || ""; document.getElementById('prod-ig-link').value=pr.igLink || "";
+        if(pr.image) { tempProductImage = pr.image; document.getElementById('image-preview').src = pr.image; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block'; } else { removeTempImage(); }
+        const c=document.getElementById('recipe-container'); c.innerHTML=''; pr.recipe.forEach(i=>addRecipeRow(i.matId, i.qty)); 
+        document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); 
+    }
+    
+    function cancelEdit() { editingProductId = null; document.getElementById('prod-name').value = ''; document.getElementById('prod-price').value = ''; document.getElementById('prod-code').value = ''; document.getElementById('prod-ig-link').value = ''; removeTempImage(); document.getElementById('recipe-container').innerHTML = ''; addRecipeRow(); document.getElementById('cancel-edit-btn').style.display = 'none'; }
+    function cloneProduct(id) { const pr = db.products.find(x => x.id === id); if(!pr) return; editProduct(id); editingProductId = null; document.getElementById('prod-name').value = pr.name + " (Kopya)"; document.getElementById('prod-code').value = ""; }
     function deleteProduct(id) { if(confirm("Ürünü silmek istediğinize emin misiniz?")) { db.products = db.products.filter(x => x.id !== id); saveDB(); refreshUI(); } }
     function produceItem(id) { const pr = db.products.find(x => x.id === id); const q = parseInt(prompt(`${pr.name} kaç adet üretildi?`)); if(isNaN(q) || q<=0) return; pr.recipe.forEach(i => { db.stockLogs.push({id: 'LOG-'+Date.now()+Math.random(), matId: i.matId, date: new Date().toISOString().slice(0,10), type: 'OUT', qty: i.qty * q, price: 0}); }); pr.finishedStock = (pr.finishedStock || 0) + q; saveDB(); refreshUI(); }
 
@@ -341,28 +377,57 @@
     function refreshUI() {
         const ms = document.getElementById('log-mat-select'); ms.innerHTML = '<option value="">-Seç-</option>'; 
         const it = document.getElementById('inventory-list'); it.innerHTML = ''; let totalRawValue = 0; let totalWasteLoss = 0;
+        
         db.materials.forEach(m => { 
-            const u = m.unit || 'gr'; ms.innerHTML += `<option value="${m.id}" data-unit="${u}">${m.name}</option>`; const st = calculateMaterialStats(m.id); totalRawValue += (st.stock * st.avgCost); 
-            const alertLimit = m.alertLimit || 0; const isCritical = st.stock <= alertLimit; const rowClass = isCritical ? 'class="stock-warning-row"' : ''; const badgeHTML = isCritical ? `<span class="badge badge-danger" style="margin-left:5px;">⚠️ Uyarı</span>` : '';
-            it.innerHTML += `<tr ${rowClass}><td>${m.name} ${badgeHTML}</td><td>${u.toUpperCase()}</td><td><b>${st.stock}</b></td><td>${alertLimit}</td><td>${st.avgCost.toFixed(3)} ₺</td><td><div style="display:flex; gap:4px;"><button class="btn-warning" onclick="editMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Düzenle">✏️</button><button class="btn-danger" onclick="deleteMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Sil">🗑️</button></div></td></tr>`; 
+            const u = m.unit || 'gr'; ms.innerHTML += `<option value="${m.id}" data-unit="${u}">${m.name}</option>`; 
+            const st = calculateMaterialStats(m.id); totalRawValue += (st.stock * st.avgCost); 
+            const alertLimit = m.alertLimit || 0; const isCritical = st.stock <= alertLimit; 
+            const rowClass = isCritical ? 'class="stock-warning-row"' : ''; 
+            const badgeHTML = isCritical ? `<span class="badge badge-danger" style="margin-left:5px;">⚠️ Uyarı</span>` : ''; 
+            
+            // YENİ BUTON (GEÇMİŞ) EKLENDİ
+            it.innerHTML += `<tr ${rowClass}>
+                <td>${m.name} ${badgeHTML}</td>
+                <td>${u.toUpperCase()}</td>
+                <td><b>${st.stock}</b></td>
+                <td>${alertLimit}</td>
+                <td>${st.avgCost.toFixed(3)} ₺</td>
+                <td>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                        <button class="btn-info" onclick="openMaterialHistory('${m.id}')" style="padding:6px 10px; min-height:0;" title="Hareket Geçmişini Gör">🕒 Geçmiş</button>
+                        <button class="btn-warning" onclick="editMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Düzenle">✏️</button>
+                        <button class="btn-danger" onclick="deleteMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Sil">🗑️</button>
+                    </div>
+                </td>
+            </tr>`; 
         });
         db.wasteLogs.forEach(w => { totalWasteLoss += w.cost; });
 
         const plc = document.getElementById('product-list-container'); plc.innerHTML = ''; const lps = document.getElementById('loc-prod-select'); lps.innerHTML = '<option value="">-Ürün-</option>'; const qas = document.getElementById('q-add-select'); qas.innerHTML = '<option value="">-Kuyruğa Eklenecek Ürün-</option>';
-        let cardsHTML = '<div class="grid-4">'; let listHTML = '<div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Malzemeler</th><th>Maliyet</th><th>Standart Satış</th><th>Net Kâr</th><th>Merkez Stok</th><th>İşlemler</th></tr></thead><tbody>';
+        let cardsHTML = '<div class="grid-4">'; let listHTML = '<div class="table-responsive"><table><thead><tr><th>Resim</th><th>Ürün & Kod</th><th>Malzemeler</th><th>Net Kâr</th><th>Merkez Stok</th><th>İşlemler</th></tr></thead><tbody>';
         const term = (document.getElementById('product-search-input')?.value || '').toLowerCase(); let productAnalytics = [];
 
         db.products.forEach(p => {
-            lps.innerHTML += `<option value="${p.id}">${p.name} (Stok: ${p.finishedStock || 0})</option>`; qas.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            const pCode = p.code ? `[${p.code}] ` : '';
+            lps.innerHTML += `<option value="${p.id}">${pCode}${p.name} (Stok: ${p.finishedStock || 0})</option>`; qas.innerHTML += `<option value="${p.id}">${pCode}${p.name}</option>`;
             let tc = 0; let recipeHTMLCard = ''; let recipeHTMLList = '';
             p.recipe.forEach(i => { const matCost = calculateMaterialStats(i.matId).avgCost; tc += (matCost * i.qty); const mat = db.materials.find(m => m.id === i.matId); const matName = mat ? mat.name : 'Silinmiş'; const unit = mat ? (mat.unit || 'gr') : 'gr'; recipeHTMLCard += `<div class="product-recipe-item"><span>${matName}</span> <b>${i.qty} ${unit}</b></div>`; recipeHTMLList += `${matName} (${i.qty} ${unit})<br>`; });
             const profit = (p.sellPrice || 0) - tc;
             let totalSold = 0; let totalLocStock = 0;
             db.locations.forEach(loc => { let sent=0, sold=0, ret=0; db.locationLogs.filter(log => log.locId === loc.id && log.prodId === p.id).forEach(log => { if(log.type === 'SEND') sent += log.qty; if(log.type === 'SALE') sold += log.qty; if(log.type === 'RETURN') ret += log.qty; }); totalSold += sold; totalLocStock += (sent - sold - ret); });
             let totalGlobalStock = (p.finishedStock || 0) + totalLocStock; productAnalytics.push({ id: p.id, name: p.name, sold: totalSold, stock: totalGlobalStock });
-            if (!p.name.toLowerCase().includes(term)) return; 
-            cardsHTML += `<div class="product-card"><div><div class="product-card-header"><div class="product-card-title">${p.name}</div><div style="color:var(--success); font-weight:bold; font-size:14px; text-align:right;">Stok: <br><span style="font-size:18px;">${p.finishedStock || 0}</span></div></div><div class="product-recipe-list"><strong style="display:block; margin-bottom:8px; color:var(--primary);">Kullanılan Malzemeler:</strong>${recipeHTMLCard}</div><div class="product-stats"><div>Maliyet<br><b style="color:var(--danger)">${tc.toFixed(2)} ₺</b></div><div>Satış<br><b style="color:var(--primary)">${(p.sellPrice || 0).toFixed(2)} ₺</b></div><div>Net Kâr<br><b style="color:${profit >= 0 ? 'var(--success)' : 'var(--danger)'}">${profit.toFixed(2)} ₺</b></div></div></div><div class="product-actions"><button style="flex: 1 1 100%; margin-bottom:4px;" class="btn-success" onclick="produceItem('${p.id}')">⚙️ Üret (Stoktan Düş)</button><button style="flex: 1;" class="btn-purple" onclick="cloneProduct('${p.id}')">📑 Kopya</button><button style="flex: 1;" class="btn-warning" onclick="editProduct('${p.id}')">✏️ Düz.</button><button style="flex: 1;" class="btn-danger" onclick="deleteProduct('${p.id}')">🗑️ Sil</button></div></div>`;
-            listHTML += `<tr><td><strong>${p.name}</strong></td><td style="font-size: 11px; color: #555;">${recipeHTMLList}</td><td style="color:var(--danger)">${tc.toFixed(2)} ₺</td><td style="color:var(--primary)">${(p.sellPrice||0).toFixed(2)} ₺</td><td><strong style="color:${profit>=0?'var(--success)':'var(--danger)'}">${profit.toFixed(2)} ₺</strong></td><td><strong style="color:var(--success)">${p.finishedStock||0}</strong></td><td><div style="display:flex; gap:4px; flex-wrap:wrap;"><button onclick="produceItem('${p.id}')" title="Üret">⚙️ Üret</button><button class="btn-purple" onclick="cloneProduct('${p.id}')" title="Kopyala">📑</button><button class="btn-warning" onclick="editProduct('${p.id}')" title="Düzenle">✏️</button><button class="btn-danger" onclick="deleteProduct('${p.id}')" title="Sil">🗑️</button></div></td></tr>`;
+            
+            if (!p.name.toLowerCase().includes(term) && !(p.code && p.code.toLowerCase().includes(term))) return; 
+
+            let imageHTML = p.image ? `<img src="${p.image}" class="product-image-thumbnail">` : '';
+            let codeHTML = p.code ? `<div class="product-code-badge">${p.code}</div>` : '';
+            let igHTML = p.igLink ? `<a href="${p.igLink}" target="_blank" class="btn-outline" style="flex:1; text-align:center; padding:10px; text-decoration:none; display:block;">📱 IG Gör</a>` : '';
+
+            cardsHTML += `<div class="product-card"><div>${imageHTML}<div class="product-card-header"><div class="product-card-title">${p.name} ${codeHTML}</div><div style="color:var(--success); font-weight:bold; font-size:14px; text-align:right;">Stok: <br><span style="font-size:18px;">${p.finishedStock || 0}</span></div></div><div class="product-recipe-list"><strong style="display:block; margin-bottom:8px; color:var(--primary);">Kullanılan Malzemeler:</strong>${recipeHTMLCard}</div><div class="product-stats"><div>Maliyet<br><b style="color:var(--danger)">${tc.toFixed(2)} ₺</b></div><div>Satış<br><b style="color:var(--primary)">${(p.sellPrice || 0).toFixed(2)} ₺</b></div><div>Net Kâr<br><b style="color:${profit >= 0 ? 'var(--success)' : 'var(--danger)'}">${profit.toFixed(2)} ₺</b></div></div></div><div class="product-actions"><button style="flex: 1 1 100%; margin-bottom:4px;" class="btn-success" onclick="produceItem('${p.id}')">⚙️ Üret (Stoktan Düş)</button>${igHTML}<button style="flex: 1;" class="btn-purple" onclick="cloneProduct('${p.id}')">📑 Kopya</button><button style="flex: 1;" class="btn-warning" onclick="editProduct('${p.id}')">✏️ Düz.</button><button style="flex: 1;" class="btn-danger" onclick="deleteProduct('${p.id}')">🗑️ Sil</button></div></div>`;
+            
+            let listImgHTML = p.image ? `<img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">` : 'Yok';
+            let listIgHTML = p.igLink ? `<a href="${p.igLink}" target="_blank" title="Instagram">📱</a>` : '';
+            listHTML += `<tr><td>${listImgHTML}</td><td><strong>${p.name}</strong><br><span style="font-size:10px; color:#777;">${p.code || ''}</span></td><td style="font-size: 11px; color: #555;">${recipeHTMLList}</td><td><strong style="color:${profit>=0?'var(--success)':'var(--danger)'}">${profit.toFixed(2)} ₺</strong></td><td><strong style="color:var(--success)">${p.finishedStock||0}</strong></td><td><div style="display:flex; gap:4px; flex-wrap:wrap;"><button onclick="produceItem('${p.id}')" title="Üret">⚙️</button>${listIgHTML}<button class="btn-purple" onclick="cloneProduct('${p.id}')" title="Kopyala">📑</button><button class="btn-warning" onclick="editProduct('${p.id}')" title="Düzenle">✏️</button><button class="btn-danger" onclick="deleteProduct('${p.id}')" title="Sil">🗑️</button></div></td></tr>`;
         });
         cardsHTML += '</div>'; listHTML += '</tbody></table></div>'; plc.innerHTML = productViewMode === 'card' ? cardsHTML : listHTML;
 
@@ -374,7 +439,11 @@
             if(q.status === 'TODO') actHTML = `<button class="btn-warning" style="font-size:11px; padding:4px;" onclick="changeQStatus('${q.id}','IN_PROGRESS')">Üretime Al ➡️</button> <button class="btn-outline" style="font-size:11px; padding:4px;" onclick="archiveQ('${q.id}')">İptal</button>`;
             else if(q.status === 'IN_PROGRESS') actHTML = `<button class="btn-outline" style="font-size:11px; padding:4px;" onclick="changeQStatus('${q.id}','TODO')">⬅️ Geri</button> <button class="btn-success" style="font-size:11px; padding:4px;" onclick="finishQItem('${q.id}')">Tamamla ✅</button>`;
             else actHTML = `<button class="btn-outline" style="font-size:11px; padding:4px;" onclick="changeQStatus('${q.id}','IN_PROGRESS')">⬅️ Geri</button> <button class="btn-danger" style="font-size:11px; padding:4px;" onclick="archiveQ('${q.id}')">Arşivle 🗄️</button>`;
-            const card = `<div class="k-item ${isCust ? 'urgent' : ''}"><div style="font-size:11px; color:#999; text-align:right;">${q.date}</div><div style="font-weight:bold; margin-bottom:5px;">${q.name}</div><div style="font-size:13px; color:var(--secondary); margin-bottom:10px;">Miktar: <b>${q.qty} Adet</b></div><div class="k-actions">${actHTML}</div></div>`;
+            
+            let pImgHTML = "";
+            if(q.type === 'STD') { const relatedPr = db.products.find(x=>x.id===q.refId); if(relatedPr && relatedPr.image) pImgHTML = `<img src="${relatedPr.image}" style="width:100%; height:80px; object-fit:contain; border-radius:4px; margin-bottom:5px;">`; }
+
+            const card = `<div class="k-item ${isCust ? 'urgent' : ''}">${pImgHTML}<div style="font-size:11px; color:#999; text-align:right;">${q.date}</div><div style="font-weight:bold; margin-bottom:5px;">${q.name}</div><div style="font-size:13px; color:var(--secondary); margin-bottom:10px;">Miktar: <b>${q.qty} Adet</b></div><div class="k-actions">${actHTML}</div></div>`;
             if(q.status === 'TODO') kTodo.innerHTML += card; else if(q.status === 'IN_PROGRESS') kProg.innerHTML += card; else if(q.status === 'DONE') kDone.innerHTML += card;
         });
         if(kArchive.innerHTML === '') kArchive.innerHTML = '<tr><td colspan="4" style="text-align:center;">Henüz arşivlenmiş kayıt yok.</td></tr>';
