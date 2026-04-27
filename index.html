@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D İş Takip ERP - V26</title>
+    <title>3D İş Takip ERP - V29</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☁️</text></svg>">
     <link rel="apple-touch-icon" href="logo.jpg">
@@ -57,6 +57,8 @@
         
         .product-image-thumbnail { width: 100%; height: 120px; object-fit: contain; background: #f8f9fa; border-radius: 6px; margin-bottom: 10px; border: 1px solid #eee; }
         .product-code-badge { background: #ecf0f1; color: var(--secondary); padding: 3px 6px; border-radius: 4px; font-size: 11px; font-family: monospace; display: inline-block; margin-top: 4px; }
+        
+        .color-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #bbb; margin-right: 6px; vertical-align: middle; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -84,7 +86,17 @@
             <div class="card">
                 <h3 style="margin-bottom: 10px;">Yeni Hammadde Tanımla</h3>
                 <div class="form-group"><label>Adı (Örn: PLA Kırmızı / Halka)</label><input type="text" id="new-mat-name"></div>
-                <div class="grid-2"><div class="form-group"><label>Birim Tipi</label><select id="new-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div><div class="form-group"><label>Kritik Uyarı Limiti</label><input type="number" id="new-mat-limit" placeholder="Örn: 500"></div></div>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Renk Skalası</label>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span id="new-mat-color-preview" class="color-dot" style="margin:0; width:16px; height:16px; min-width:16px;"></span>
+                            <select id="new-mat-color" style="flex:1;" onchange="document.getElementById('new-mat-color-preview').style.backgroundColor=this.value"></select>
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Birim</label><select id="new-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div>
+                    <div class="form-group"><label>Uyarı</label><input type="number" id="new-mat-limit" placeholder="Örn: 500"></div>
+                </div>
                 <button onclick="createNewMaterial()" style="width:100%">Kataloğa Ekle</button>
             </div>
             <div class="card" style="border-top: 4px solid var(--success);">
@@ -125,7 +137,6 @@
                     <button class="btn-danger" id="remove-img-btn" onclick="removeTempImage()" style="display:none; padding:5px 10px; font-size:12px;">Resmi Kaldır</button>
                     <img id="image-preview" src="" style="display:none; width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc;">
                 </div>
-                <p style="font-size:11px; color:#7f8c8d; margin-top:5px; margin-bottom:0;">*Sistem veritabanını korumak için fotoğrafı otomatik olarak küçülterek kaydeder.</p>
             </div>
             <div id="recipe-container" style="margin-top:15px;"><label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label></div>
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap:wrap;"><button class="btn-warning" onclick="addRecipeRow()">+ Malzeme Ekle</button><button class="btn-success" id="save-prod-btn" onclick="saveProduct()">📦 Ürünü Kaydet</button><button class="btn-outline" id="cancel-edit-btn" onclick="cancelEdit()" style="display: none;">İptal</button></div>
@@ -167,24 +178,9 @@
     </div>
 </div>
 
-<div id="editMatModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0;">Hammadde Düzenle</h3><button class="close-btn" onclick="document.getElementById('editMatModal').style.display='none'">✖</button></div><input type="hidden" id="edit-mat-id"><div class="form-group"><label>Hammadde Adı</label><input type="text" id="edit-mat-name"></div><div class="grid-2"><div class="form-group"><label>Birim Tipi</label><select id="edit-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div><div class="form-group"><label>Kritik Uyarı Limiti</label><input type="number" id="edit-mat-limit"></div></div><button class="btn-success" onclick="saveEditedMaterial()" style="width:100%; margin-top:10px;">Kaydet</button></div></div>
+<div id="editMatModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0;">Hammadde Düzenle</h3><button class="close-btn" onclick="document.getElementById('editMatModal').style.display='none'">✖</button></div><input type="hidden" id="edit-mat-id"><div class="form-group"><label>Hammadde Adı</label><input type="text" id="edit-mat-name"></div><div class="grid-3"><div class="form-group"><label>Renk</label><div style="display:flex; align-items:center; gap:5px;"><span id="edit-mat-color-preview" class="color-dot" style="margin:0; width:16px; height:16px; min-width:16px;"></span><select id="edit-mat-color" style="flex:1;" onchange="document.getElementById('edit-mat-color-preview').style.backgroundColor=this.value"></select></div></div><div class="form-group"><label>Birim Tipi</label><select id="edit-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div><div class="form-group"><label>Kritik Uyarı</label><input type="number" id="edit-mat-limit"></div></div><button class="btn-success" onclick="saveEditedMaterial()" style="width:100%; margin-top:10px;">Kaydet</button></div></div>
 <div id="wasteHistoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0;">🗑️ Fire / Atık Geçmişi</h3><button class="close-btn" onclick="document.getElementById('wasteHistoryModal').style.display='none'">✖</button></div><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Miktar</th><th>Zarar</th><th>İptal</th></tr></thead><tbody id="waste-history-list"></tbody></table></div></div></div>
-
-<div id="materialHistoryModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
-        <div class="modal-header">
-            <h3 id="mat-history-title" style="margin:0; color:var(--primary);">📦 Stok Hareketleri</h3>
-            <button class="close-btn" onclick="document.getElementById('materialHistoryModal').style.display='none'">✖</button>
-        </div>
-        <p style="font-size:12px; color:#7f8c8d; margin-top:0;">Hammaddeyi silmek istiyorsanız önce bu listedeki tüm geçmiş kayıtları silmelisiniz.</p>
-        <div class="table-responsive">
-            <table>
-                <thead><tr><th>Tarih</th><th>İşlem Tipi</th><th>Miktar</th><th>Tutar (Alım)</th><th>İşlem</th></tr></thead>
-                <tbody id="mat-history-list"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
+<div id="materialHistoryModal" class="modal"><div class="modal-content" style="max-width: 600px;"><div class="modal-header"><h3 id="mat-history-title" style="margin:0; color:var(--primary);">📦 Stok Hareketleri</h3><button class="close-btn" onclick="document.getElementById('materialHistoryModal').style.display='none'">✖</button></div><p style="font-size:12px; color:#7f8c8d; margin-top:0;">Hammaddeyi silmek istiyorsanız önce bu listedeki tüm geçmiş kayıtları silmelisiniz.</p><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>İşlem Tipi</th><th>Miktar</th><th>Tutar (Alım)</th><th>İşlem</th></tr></thead><tbody id="mat-history-list"></tbody></table></div></div></div>
 
 <script>
     // ==========================================================================
@@ -204,13 +200,62 @@
     const dbRef = firestore.collection("ERP_Data").doc("Main_Database");
 
     // ==========================================================================
-    // VERİTABANI DEĞİŞKENİ VE BULUTTAN ÇEKME İŞLEMİ
+    // SENİN GÖNDERDİĞİN ORİJİNAL RENK LİSTESİ
     // ==========================================================================
+    const siteColors = [
+        { name: "Açık Mavi", rgb: "rgb(0, 173, 249)" },
+        { name: "Açık Yeşil", rgb: "rgb(0, 250, 78)" },
+        { name: "Ateş Kırmızı", rgb: "rgb(164, 0, 0)" },
+        { name: "Bakır", rgb: "rgb(192, 109, 0)" },
+        { name: "Bej", rgb: "rgb(249, 246, 205)" },
+        { name: "Bej Mermer", rgb: "rgb(243, 244, 186)" },
+        { name: "Beyaz", rgb: "rgb(255, 255, 255)" },
+        { name: "Bronz", rgb: "rgb(133, 78, 0)" },
+        { name: "Dark Blue", rgb: "rgb(21, 34, 88)" },
+        { name: "Gold", rgb: "rgb(247, 185, 0)" },
+        { name: "Gri", rgb: "rgb(120, 120, 120)" },
+        { name: "Gümüş Gri", rgb: "rgb(192, 192, 192)" },
+        { name: "Haki Yeşil", rgb: "rgb(93, 185, 87)" },
+        { name: "İnci Beyaz", rgb: "rgb(253, 253, 240)" },
+        { name: "Kahverengi", rgb: "rgb(160, 104, 0)" },
+        { name: "Kemik Beyazı", rgb: "rgb(250, 240, 230)" },
+        { name: "Kırmızı", rgb: "rgb(220, 20, 60)" },
+        { name: "Lila", rgb: "rgb(200, 162, 200)" },
+        { name: "Mavi", rgb: "rgb(0, 0, 255)" },
+        { name: "Mermer", rgb: "rgb(226, 226, 226)" },
+        { name: "Metalik Mavi", rgb: "rgb(50, 82, 123)" },
+        { name: "Mor", rgb: "rgb(128, 0, 128)" },
+        { name: "Natürel", rgb: "rgb(235, 235, 230)" },
+        { name: "Pembe", rgb: "rgb(255, 105, 180)" },
+        { name: "Petrol Yeşili", rgb: "rgb(18, 62, 52)" },
+        { name: "Sarı", rgb: "rgb(246, 239, 7)" },
+        { name: "Siyah", rgb: "rgb(0, 0, 0)" },
+        { name: "Soft Beyaz", rgb: "rgb(245, 245, 245)" },
+        { name: "Sütlü Kahve", rgb: "rgb(167, 122, 50)" },
+        { name: "Ten Rengi", rgb: "rgb(244, 244, 194)" },
+        { name: "Toz Pembe", rgb: "rgb(255, 182, 193)" },
+        { name: "Turkuaz", rgb: "rgb(64, 224, 208)" },
+        { name: "Turuncu", rgb: "rgb(255, 165, 0)" },
+        { name: "Yeşil", rgb: "rgb(93, 158, 68)" },
+        { name: "Zümrüt Yeşil", rgb: "rgb(0, 141, 0)" },
+        { name: "Yok (Baskısız)", rgb: "transparent" }
+    ];
+
+    function initColors() {
+        let opts = '';
+        siteColors.forEach(c => { opts += `<option value="${c.rgb}">${c.name}</option>`; });
+        document.getElementById('new-mat-color').innerHTML = opts;
+        document.getElementById('edit-mat-color').innerHTML = opts;
+        document.getElementById('new-mat-color-preview').style.backgroundColor = siteColors[0].rgb;
+    }
+
     let db = { materials: [], stockLogs: [], products: [], locations: [], locationLogs: [], productionLogs: [], wasteLogs: [], customOrders: [], queue: [] };
     let tempProductImage = ""; 
-    let currentHistoryMatId = null; // Hangi hammaddenin geçmişine baktığımızı tutar
-    
+    let currentHistoryMatId = null; 
     let productViewMode = 'card'; 
+
+    // BAŞLATMA
+    initColors();
     document.getElementById('log-date').valueAsDate = new Date(); 
     document.getElementById('loc-log-date').valueAsDate = new Date();
 
@@ -229,133 +274,52 @@
 
     function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); a.download = "Mete3D_Bulut_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); a.remove(); }
 
-    // ==========================================================================
-    // UYGULAMA MANTIK KODLARI
-    // ==========================================================================
-    let editingProductId = null; let openLocationId = null; 
     function switchTab(tab) { ['materials', 'products', 'locations', 'finance', 'custom', 'queue'].forEach(t => { document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; document.getElementById('tab-btn-' + t).className = 'nav-btn' + (t === tab ? ' active' : ''); }); refreshUI(); }
     function toggleProductView() { productViewMode = productViewMode === 'card' ? 'list' : 'card'; refreshUI(); }
 
-    function createNewMaterial() { const n = document.getElementById('new-mat-name').value; const unit = document.getElementById('new-mat-unit').value; const limit = parseInt(document.getElementById('new-mat-limit').value) || 0; if(n) { db.materials.push({id: 'MAT-'+Date.now(), name: n, unit: unit, alertLimit: limit}); saveDB(); document.getElementById('new-mat-name').value = ''; document.getElementById('new-mat-limit').value = ''; refreshUI(); } }
+    function createNewMaterial() { const n = document.getElementById('new-mat-name').value; const unit = document.getElementById('new-mat-unit').value; const color = document.getElementById('new-mat-color').value; const limit = parseInt(document.getElementById('new-mat-limit').value) || 0; if(n) { db.materials.push({id: 'MAT-'+Date.now(), name: n, unit: unit, color: color, alertLimit: limit}); saveDB(); document.getElementById('new-mat-name').value = ''; document.getElementById('new-mat-limit').value = ''; document.getElementById('new-mat-color').selectedIndex = 0; document.getElementById('new-mat-color-preview').style.backgroundColor = siteColors[0].rgb; refreshUI(); } }
     function addStockLog() { const m = document.getElementById('log-mat-select').value; const q = parseFloat(document.getElementById('log-qty').value); const p = parseFloat(document.getElementById('log-price').value); const d = document.getElementById('log-date').value; if(m && q && d) { db.stockLogs.push({id: 'LOG-'+Date.now(), matId: m, date: d, type: 'IN', qty: q, price: p}); saveDB(); document.getElementById('log-qty').value = ''; document.getElementById('log-price').value = ''; refreshUI(); } }
     
-    // YENİ EKLENEN: HAMMADDE GEÇMİŞİ VE SİLME İŞLEMLERİ
-    function openMaterialHistory(matId) {
-        currentHistoryMatId = matId;
-        const mat = db.materials.find(m => m.id === matId);
-        if(!mat) return;
-        document.getElementById('mat-history-title').innerText = `📦 ${mat.name} - Hareket Geçmişi`;
-        
-        const tbody = document.getElementById('mat-history-list');
-        tbody.innerHTML = '';
-        const logs = db.stockLogs.filter(l => l.matId === matId).slice().reverse(); // En yeni en üstte
-        
-        if(logs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Bu hammaddenin henüz hiçbir alım/kullanım kaydı yok.</td></tr>';
-        } else {
-            logs.forEach(l => {
-                const typeLabel = l.type === 'IN' 
-                    ? '<span style="color:var(--success);font-weight:bold;">🟢 Yeni Alım</span>' 
-                    : '<span style="color:var(--danger);font-weight:bold;">🔴 Üretim (Çıkış)</span>';
-                const priceLabel = l.type === 'IN' ? `${(l.price||0).toFixed(2)} ₺` : '-';
-                
-                tbody.innerHTML += `<tr>
-                    <td>${l.date}</td>
-                    <td>${typeLabel}</td>
-                    <td><b>${l.qty} ${mat.unit||'gr'}</b></td>
-                    <td>${priceLabel}</td>
-                    <td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteStockLog('${l.id}')">🗑️ Sil</button></td>
-                </tr>`;
-            });
-        }
-        document.getElementById('materialHistoryModal').style.display = 'flex';
-    }
+    function openMaterialHistory(matId) { currentHistoryMatId = matId; const mat = db.materials.find(m => m.id === matId); if(!mat) return; document.getElementById('mat-history-title').innerText = `📦 ${mat.name} - Hareket Geçmişi`; const tbody = document.getElementById('mat-history-list'); tbody.innerHTML = ''; const logs = db.stockLogs.filter(l => l.matId === matId).slice().reverse(); if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kayıt yok.</td></tr>'; } else { logs.forEach(l => { const typeLabel = l.type === 'IN' ? '<span style="color:var(--success);font-weight:bold;">🟢 Yeni Alım</span>' : '<span style="color:var(--danger);font-weight:bold;">🔴 Üretim (Çıkış)</span>'; const priceLabel = l.type === 'IN' ? `${(l.price||0).toFixed(2)} ₺` : '-'; tbody.innerHTML += `<tr><td>${l.date}</td><td>${typeLabel}</td><td><b>${l.qty} ${mat.unit||'gr'}</b></td><td>${priceLabel}</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteStockLog('${l.id}')">🗑️</button></td></tr>`; }); } document.getElementById('materialHistoryModal').style.display = 'flex'; }
+    function deleteStockLog(logId) { if(confirm("Emin misiniz?")) { db.stockLogs = db.stockLogs.filter(l => l.id !== logId); saveDB(); if(currentHistoryMatId) openMaterialHistory(currentHistoryMatId); refreshUI(); } }
 
-    function deleteStockLog(logId) {
-        if(confirm("Bu hareketi silmek istediğinize emin misiniz? Silinirse sistem hammadde miktarını ve kâr oranını tekrar hesaplayacaktır.")) {
-            db.stockLogs = db.stockLogs.filter(l => l.id !== logId);
-            saveDB();
-            if(currentHistoryMatId) openMaterialHistory(currentHistoryMatId); // Tabloyu yenile
-            refreshUI(); // Arka plandaki stok ekranını yenile
-        }
-    }
-
-    function addGlobalWasteLog() { const q = parseFloat(document.getElementById('waste-qty').value); const desc = document.getElementById('waste-desc').value || 'Genel Atık/Fire'; if(q > 0) { let totalGrams = 0; let totalValue = 0; db.materials.forEach(m => { if(m.unit !== 'adet') { const st = calculateMaterialStats(m.id); totalGrams += st.stock; totalValue += (st.stock * st.avgCost); } }); let globalAvgCost = totalGrams > 0 ? (totalValue / totalGrams) : 0; let costOfWaste = globalAvgCost * q; db.wasteLogs.push({id: 'WST-'+Date.now(), date: new Date().toISOString().slice(0,10), qty: q, cost: costOfWaste, desc: desc}); saveDB(); document.getElementById('waste-qty').value = ''; document.getElementById('waste-desc').value = ''; alert(`${q} gr Genel Fire kaydedildi.`); refreshUI(); } }
-    function openWasteHistory() { const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = ''; if(db.wasteLogs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Henüz fire kaydı bulunmuyor.</td></tr>'; } else { db.wasteLogs.slice().reverse().forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.qty} gr</b></td><td style="color:var(--danger)">${w.cost.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteWasteLog('${w.id}')">🗑️</button></td></tr>`; }); } document.getElementById('wasteHistoryModal').style.display = 'flex'; }
+    function addGlobalWasteLog() { const q = parseFloat(document.getElementById('waste-qty').value); const desc = document.getElementById('waste-desc').value || 'Genel Atık/Fire'; if(q > 0) { let totalGrams = 0; let totalValue = 0; db.materials.forEach(m => { if(m.unit !== 'adet') { const st = calculateMaterialStats(m.id); totalGrams += st.stock; totalValue += (st.stock * st.avgCost); } }); let globalAvgCost = totalGrams > 0 ? (totalValue / totalGrams) : 0; let costOfWaste = globalAvgCost * q; db.wasteLogs.push({id: 'WST-'+Date.now(), date: new Date().toISOString().slice(0,10), qty: q, cost: costOfWaste, desc: desc}); saveDB(); document.getElementById('waste-qty').value = ''; document.getElementById('waste-desc').value = ''; alert(`Fire kaydedildi.`); refreshUI(); } }
+    function openWasteHistory() { const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = ''; if(db.wasteLogs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kayıt yok.</td></tr>'; } else { db.wasteLogs.slice().reverse().forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.qty} gr</b></td><td style="color:var(--danger)">${w.cost.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteWasteLog('${w.id}')">🗑️</button></td></tr>`; }); } document.getElementById('wasteHistoryModal').style.display = 'flex'; }
     function deleteWasteLog(id) { if(confirm("İptal etmek istiyor musunuz?")) { db.wasteLogs = db.wasteLogs.filter(w => w.id !== id); saveDB(); openWasteHistory(); refreshUI(); } }
     function calculateMaterialStats(matId) { let s = 0, c = 0, p = 0; db.stockLogs.forEach(l => { if(l.matId === matId) { if(l.type === 'IN') { s += l.qty; c += (l.price || 0); p += l.qty; } else { s -= l.qty; } } }); return { stock: s, avgCost: p > 0 ? (c / p) : 0 }; }
-    function editMaterial(id) { const mat = db.materials.find(m => m.id === id); if(!mat) return; document.getElementById('edit-mat-id').value = id; document.getElementById('edit-mat-name').value = mat.name; document.getElementById('edit-mat-unit').value = mat.unit || 'gr'; document.getElementById('edit-mat-limit').value = mat.alertLimit || 0; document.getElementById('editMatModal').style.display = 'flex'; }
-    function saveEditedMaterial() { const id = document.getElementById('edit-mat-id').value; const name = document.getElementById('edit-mat-name').value; const unit = document.getElementById('edit-mat-unit').value; const limit = parseInt(document.getElementById('edit-mat-limit').value) || 0; if(!name) return; const mat = db.materials.find(m => m.id === id); if(mat) { mat.name = name.trim(); mat.unit = unit; mat.alertLimit = limit; saveDB(); refreshUI(); document.getElementById('editMatModal').style.display = 'none'; } }
     
-    // SİLME İŞLEMİ GÜNCELLENDİ (Neden silinmediğini açıklıyor)
-    function deleteMaterial(id) { 
-        const usedInLogs = db.stockLogs.some(l => l.matId === id);
-        const usedInRecipes = db.products.some(p => p.recipe.some(r => r.matId === id));
-        
-        if (usedInLogs || usedInRecipes) { 
-            alert("⚠️ BU HAMMADDE SİLİNEMEZ!\n\nÇünkü geçmişte bu hammaddeye ait alım yapılmış veya bir ürünün reçetesine eklenmiş.\n\nNasıl Silebilirim?\n1. Yanındaki '🕒' butonuna basıp tüm geçmiş hareketlerini silin.\n2. Eğer bir üründe kullanılıyorsa, o ürünün reçetesinden bu hammaddeyi çıkarın."); 
-            return; 
-        } 
-        
-        if (confirm("Bu hammaddeyi tamamen silmek istediğinize emin misiniz?")) { 
-            db.materials = db.materials.filter(m => m.id !== id); 
-            saveDB(); 
-            refreshUI(); 
-        } 
+    function editMaterial(id) { const mat = db.materials.find(m => m.id === id); if(!mat) return; document.getElementById('edit-mat-id').value = id; document.getElementById('edit-mat-name').value = mat.name; document.getElementById('edit-mat-unit').value = mat.unit || 'gr'; document.getElementById('edit-mat-color').value = mat.color || 'transparent'; document.getElementById('edit-mat-color-preview').style.backgroundColor = mat.color || 'transparent'; document.getElementById('edit-mat-limit').value = mat.alertLimit || 0; document.getElementById('editMatModal').style.display = 'flex'; }
+    function saveEditedMaterial() { const id = document.getElementById('edit-mat-id').value; const name = document.getElementById('edit-mat-name').value; const unit = document.getElementById('edit-mat-unit').value; const color = document.getElementById('edit-mat-color').value; const limit = parseInt(document.getElementById('edit-mat-limit').value) || 0; if(!name) return; const mat = db.materials.find(m => m.id === id); if(mat) { mat.name = name.trim(); mat.unit = unit; mat.color = color; mat.alertLimit = limit; saveDB(); refreshUI(); document.getElementById('editMatModal').style.display = 'none'; } }
+    function deleteMaterial(id) { const usedInLogs = db.stockLogs.some(l => l.matId === id); const usedInRecipes = db.products.some(p => p.recipe.some(r => r.matId === id)); if (usedInLogs || usedInRecipes) { alert("⚠️ BU HAMMADDE SİLİNEMEZ!\n\nÇünkü geçmişte alım yapılmış veya kullanılmış.\n1. '🕒' butonundan geçmişini silin.\n2. Reçetelerden çıkarın."); return; } if (confirm("Emin misiniz?")) { db.materials = db.materials.filter(m => m.id !== id); saveDB(); refreshUI(); } }
+    
+    // ÜRÜN (REÇETE) KISMI İÇİN DİNAMİK RENK TOPU
+    function updateRecipeInputUnit(selectElem) { 
+        const opt = selectElem.options[selectElem.selectedIndex];
+        const unit = opt.getAttribute('data-unit') || 'gr'; 
+        const col = opt.getAttribute('data-color') || 'transparent';
+        selectElem.parentElement.nextElementSibling.querySelector('input').placeholder = `Miktar (${unit})`; 
+        const dot = selectElem.parentElement.querySelector('.recipe-color-preview');
+        if(dot) dot.style.backgroundColor = col;
     }
-    
-    function updateRecipeInputUnit(selectElem) { const unit = selectElem.options[selectElem.selectedIndex].getAttribute('data-unit') || 'gr'; selectElem.parentElement.nextElementSibling.querySelector('input').placeholder = `Miktar (${unit})`; }
-    function addRecipeRow(m='', q='') { const c = document.getElementById('recipe-container'); const r = 'row-' + Date.now() + Math.random().toString(36).substr(2,5); let o = '<option value="" data-unit="gr">-Malzeme-</option>'; let sUnit = 'gr'; db.materials.forEach(mat => { const u = mat.unit || 'gr'; if(mat.id === m) sUnit = u; o += `<option value="${mat.id}" data-unit="${u}" ${mat.id === m ? 'selected' : ''}>${mat.name} (${u})</option>`; }); c.insertAdjacentHTML('beforeend', `<div class="recipe-row" id="${r}"><div class="form-group"><select class="recipe-mat-select" onchange="updateRecipeInputUnit(this)">${o}</select></div><div class="form-group"><input type="number" class="recipe-qty-input" placeholder="Miktar (${sUnit})" value="${q}"></div><button class="btn-danger" onclick="document.getElementById('${r}').remove()">X</button></div>`); }
 
-    // GÖRSEL SIKIŞTIRMA SİSTEMİ
-    document.getElementById('prod-image-upload').addEventListener('change', function(e) {
-        const file = e.target.files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 250; const scaleSize = MAX_WIDTH / img.width;
-                canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
-                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                tempProductImage = canvas.toDataURL('image/jpeg', 0.6); 
-                document.getElementById('image-preview').src = tempProductImage; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block';
-            }
-            img.src = event.target.result;
-        }
-        reader.readAsDataURL(file);
-    });
+    function addRecipeRow(m='', q='') { 
+        const c = document.getElementById('recipe-container'); 
+        const r = 'row-' + Date.now() + Math.random().toString(36).substr(2,5); 
+        let o = '<option value="" data-unit="gr" data-color="transparent">-Malzeme-</option>'; 
+        let sUnit = 'gr'; let sColor = 'transparent'; 
+        db.materials.forEach(mat => { 
+            const u = mat.unit || 'gr'; const col = mat.color || 'transparent'; 
+            if(mat.id === m) { sUnit = u; sColor = col; } 
+            o += `<option value="${mat.id}" data-unit="${u}" data-color="${col}" ${mat.id === m ? 'selected' : ''}>${mat.name} (${u})</option>`; 
+        }); 
+        c.insertAdjacentHTML('beforeend', `<div class="recipe-row" id="${r}"><div class="form-group" style="display:flex; align-items:center; gap:8px;"><span class="color-dot recipe-color-preview" style="background-color:${sColor}; margin:0; width:16px; height:16px; min-width:16px;"></span><select class="recipe-mat-select" style="flex:1;" onchange="updateRecipeInputUnit(this)">${o}</select></div><div class="form-group"><input type="number" class="recipe-qty-input" placeholder="Miktar (${sUnit})" value="${q}"></div><button class="btn-danger" onclick="document.getElementById('${r}').remove()">X</button></div>`); 
+    }
 
+    document.getElementById('prod-image-upload').addEventListener('change', function(e) { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_WIDTH = 250; const scaleSize = MAX_WIDTH / img.width; canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); tempProductImage = canvas.toDataURL('image/jpeg', 0.6); document.getElementById('image-preview').src = tempProductImage; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block'; }; img.src = event.target.result; }; reader.readAsDataURL(file); });
     function removeTempImage() { tempProductImage = ""; document.getElementById('prod-image-upload').value = ""; document.getElementById('image-preview').style.display = 'none'; document.getElementById('image-preview').src = ""; document.getElementById('remove-img-btn').style.display = 'none'; }
 
-    function saveProduct() { 
-        const n = document.getElementById('prod-name').value; const p = parseFloat(document.getElementById('prod-price').value) || 0; 
-        const c = document.getElementById('prod-code').value; const ig = document.getElementById('prod-ig-link').value;
-        if(!n) return alert("Ürün adı girmelisiniz!"); 
-        let r = []; document.querySelectorAll('.recipe-row').forEach(row => { const m = row.querySelector('.recipe-mat-select').value; const q = parseFloat(row.querySelector('.recipe-qty-input').value); if(m && q) r.push({matId: m, qty: q}); }); 
-        if(r.length === 0) return alert("En az 1 malzeme eklemelisiniz!"); 
-        
-        if(editingProductId) { 
-            const pr = db.products.find(x => x.id === editingProductId); 
-            pr.name = n; pr.sellPrice = p; pr.code = c; pr.igLink = ig; pr.recipe = r; 
-            if(tempProductImage !== "") pr.image = tempProductImage;
-            cancelEdit(); 
-        } else { 
-            db.products.push({id: 'PROD-'+Date.now(), name: n, sellPrice: p, code: c, igLink: ig, image: tempProductImage, recipe: r, finishedStock: 0}); 
-            cancelEdit(); 
-        } 
-        saveDB(); refreshUI(); 
-    }
-
-    function editProduct(id) { 
-        const pr=db.products.find(x=>x.id===id); if(!pr)return; editingProductId=id; 
-        document.getElementById('prod-name').value=pr.name; document.getElementById('prod-price').value=pr.sellPrice; 
-        document.getElementById('prod-code').value=pr.code || ""; document.getElementById('prod-ig-link').value=pr.igLink || "";
-        if(pr.image) { tempProductImage = pr.image; document.getElementById('image-preview').src = pr.image; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block'; } else { removeTempImage(); }
-        const c=document.getElementById('recipe-container'); c.innerHTML=''; pr.recipe.forEach(i=>addRecipeRow(i.matId, i.qty)); 
-        document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); 
-    }
-    
+    function saveProduct() { const n = document.getElementById('prod-name').value; const p = parseFloat(document.getElementById('prod-price').value) || 0; const c = document.getElementById('prod-code').value; const ig = document.getElementById('prod-ig-link').value; if(!n) return alert("Ürün adı girmelisiniz!"); let r = []; document.querySelectorAll('.recipe-row').forEach(row => { const m = row.querySelector('.recipe-mat-select').value; const q = parseFloat(row.querySelector('.recipe-qty-input').value); if(m && q) r.push({matId: m, qty: q}); }); if(r.length === 0) return alert("En az 1 malzeme eklemelisiniz!"); if(editingProductId) { const pr = db.products.find(x => x.id === editingProductId); pr.name = n; pr.sellPrice = p; pr.code = c; pr.igLink = ig; pr.recipe = r; if(tempProductImage !== "") pr.image = tempProductImage; cancelEdit(); } else { db.products.push({id: 'PROD-'+Date.now(), name: n, sellPrice: p, code: c, igLink: ig, image: tempProductImage, recipe: r, finishedStock: 0}); cancelEdit(); } saveDB(); refreshUI(); }
+    function editProduct(id) { const pr=db.products.find(x=>x.id===id); if(!pr)return; editingProductId=id; document.getElementById('prod-name').value=pr.name; document.getElementById('prod-price').value=pr.sellPrice; document.getElementById('prod-code').value=pr.code || ""; document.getElementById('prod-ig-link').value=pr.igLink || ""; if(pr.image) { tempProductImage = pr.image; document.getElementById('image-preview').src = pr.image; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block'; } else { removeTempImage(); } const c=document.getElementById('recipe-container'); c.innerHTML=''; pr.recipe.forEach(i=>addRecipeRow(i.matId, i.qty)); document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); }
     function cancelEdit() { editingProductId = null; document.getElementById('prod-name').value = ''; document.getElementById('prod-price').value = ''; document.getElementById('prod-code').value = ''; document.getElementById('prod-ig-link').value = ''; removeTempImage(); document.getElementById('recipe-container').innerHTML = ''; addRecipeRow(); document.getElementById('cancel-edit-btn').style.display = 'none'; }
     function cloneProduct(id) { const pr = db.products.find(x => x.id === id); if(!pr) return; editProduct(id); editingProductId = null; document.getElementById('prod-name').value = pr.name + " (Kopya)"; document.getElementById('prod-code').value = ""; }
     function deleteProduct(id) { if(confirm("Ürünü silmek istediğinize emin misiniz?")) { db.products = db.products.filter(x => x.id !== id); saveDB(); refreshUI(); } }
@@ -379,22 +343,24 @@
         const it = document.getElementById('inventory-list'); it.innerHTML = ''; let totalRawValue = 0; let totalWasteLoss = 0;
         
         db.materials.forEach(m => { 
-            const u = m.unit || 'gr'; ms.innerHTML += `<option value="${m.id}" data-unit="${u}">${m.name}</option>`; 
+            const u = m.unit || 'gr'; 
+            ms.innerHTML += `<option value="${m.id}" data-unit="${u}">${m.name}</option>`; 
             const st = calculateMaterialStats(m.id); totalRawValue += (st.stock * st.avgCost); 
             const alertLimit = m.alertLimit || 0; const isCritical = st.stock <= alertLimit; 
             const rowClass = isCritical ? 'class="stock-warning-row"' : ''; 
             const badgeHTML = isCritical ? `<span class="badge badge-danger" style="margin-left:5px;">⚠️ Uyarı</span>` : ''; 
             
-            // YENİ BUTON (GEÇMİŞ) EKLENDİ
+            const cDot = m.color && m.color !== 'transparent' ? `<span class="color-dot" style="background-color:${m.color};"></span>` : '';
+
             it.innerHTML += `<tr ${rowClass}>
-                <td>${m.name} ${badgeHTML}</td>
+                <td>${cDot}${m.name} ${badgeHTML}</td>
                 <td>${u.toUpperCase()}</td>
                 <td><b>${st.stock}</b></td>
                 <td>${alertLimit}</td>
                 <td>${st.avgCost.toFixed(3)} ₺</td>
                 <td>
                     <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                        <button class="btn-info" onclick="openMaterialHistory('${m.id}')" style="padding:6px 10px; min-height:0;" title="Hareket Geçmişini Gör">🕒 Geçmiş</button>
+                        <button class="btn-info" onclick="openMaterialHistory('${m.id}')" style="padding:6px 10px; min-height:0;" title="Geçmiş">🕒 Geçmiş</button>
                         <button class="btn-warning" onclick="editMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Düzenle">✏️</button>
                         <button class="btn-danger" onclick="deleteMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Sil">🗑️</button>
                     </div>
@@ -411,7 +377,13 @@
             const pCode = p.code ? `[${p.code}] ` : '';
             lps.innerHTML += `<option value="${p.id}">${pCode}${p.name} (Stok: ${p.finishedStock || 0})</option>`; qas.innerHTML += `<option value="${p.id}">${pCode}${p.name}</option>`;
             let tc = 0; let recipeHTMLCard = ''; let recipeHTMLList = '';
-            p.recipe.forEach(i => { const matCost = calculateMaterialStats(i.matId).avgCost; tc += (matCost * i.qty); const mat = db.materials.find(m => m.id === i.matId); const matName = mat ? mat.name : 'Silinmiş'; const unit = mat ? (mat.unit || 'gr') : 'gr'; recipeHTMLCard += `<div class="product-recipe-item"><span>${matName}</span> <b>${i.qty} ${unit}</b></div>`; recipeHTMLList += `${matName} (${i.qty} ${unit})<br>`; });
+            p.recipe.forEach(i => { 
+                const matCost = calculateMaterialStats(i.matId).avgCost; tc += (matCost * i.qty); 
+                const mat = db.materials.find(m => m.id === i.matId); const matName = mat ? mat.name : 'Silinmiş'; const unit = mat ? (mat.unit || 'gr') : 'gr'; 
+                const cDot = mat && mat.color && mat.color !== 'transparent' ? `<span class="color-dot" style="width:10px; height:10px; background-color:${mat.color}; margin-right:4px;"></span>` : '';
+                recipeHTMLCard += `<div class="product-recipe-item"><span>${cDot}${matName}</span> <b>${i.qty} ${unit}</b></div>`; 
+                recipeHTMLList += `${cDot}${matName} (${i.qty} ${unit})<br>`; 
+            });
             const profit = (p.sellPrice || 0) - tc;
             let totalSold = 0; let totalLocStock = 0;
             db.locations.forEach(loc => { let sent=0, sold=0, ret=0; db.locationLogs.filter(log => log.locId === loc.id && log.prodId === p.id).forEach(log => { if(log.type === 'SEND') sent += log.qty; if(log.type === 'SALE') sold += log.qty; if(log.type === 'RETURN') ret += log.qty; }); totalSold += sold; totalLocStock += (sent - sold - ret); });
@@ -446,7 +418,7 @@
             const card = `<div class="k-item ${isCust ? 'urgent' : ''}">${pImgHTML}<div style="font-size:11px; color:#999; text-align:right;">${q.date}</div><div style="font-weight:bold; margin-bottom:5px;">${q.name}</div><div style="font-size:13px; color:var(--secondary); margin-bottom:10px;">Miktar: <b>${q.qty} Adet</b></div><div class="k-actions">${actHTML}</div></div>`;
             if(q.status === 'TODO') kTodo.innerHTML += card; else if(q.status === 'IN_PROGRESS') kProg.innerHTML += card; else if(q.status === 'DONE') kDone.innerHTML += card;
         });
-        if(kArchive.innerHTML === '') kArchive.innerHTML = '<tr><td colspan="4" style="text-align:center;">Henüz arşivlenmiş kayıt yok.</td></tr>';
+        if(kArchive.innerHTML === '') kArchive.innerHTML = '<tr><td colspan="4" style="text-align:center;">Yeterli veri yok.</td></tr>';
 
         const b2cList = document.getElementById('custom-orders-list'); b2cList.innerHTML = ''; let b2cTotalRevenue = 0; 
         db.customOrders.forEach(o => {
@@ -494,9 +466,9 @@
         let topSellers = [...productAnalytics].sort((a, b) => b.sold - a.sold).slice(0, 5); let worstSellers = [...productAnalytics].filter(p => p.stock > 0).sort((a, b) => a.sold - b.sold).slice(0, 5);
 
         topSellers.forEach(p => { bestSellersBody.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class="badge badge-info" style="font-size:14px;">${p.sold} Adet</span></td></tr>`; });
-        if(topSellers.length === 0 || topSellers[0].sold === 0) bestSellersBody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Henüz yeterli satış verisi yok.</td></tr>';
+        if(topSellers.length === 0 || topSellers[0].sold === 0) bestSellersBody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Veri yok.</td></tr>';
         worstSellers.forEach(p => { deadStockBody.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class="badge badge-warning">${p.stock} Adet</span></td><td><span class="badge badge-danger">${p.sold} Adet Satıldı</span></td></tr>`; });
-        if(worstSellers.length === 0) deadStockBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Harika! Elinizde şişen ölü bir stok bulunmuyor.</td></tr>';
+        if(worstSellers.length === 0) deadStockBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Ölü stok bulunmuyor.</td></tr>';
     }
 
     refreshUI();
