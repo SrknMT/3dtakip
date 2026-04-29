@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D İş Takip ERP - V31</title>
+    <title>3D İş Takip ERP - V32</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☁️</text></svg>">
     <link rel="apple-touch-icon" href="logo.jpg">
@@ -139,7 +139,11 @@
                 </div>
                 <p style="font-size:11px; color:#7f8c8d; margin-top:5px; margin-bottom:0;">*Sistem veritabanını korumak için fotoğrafı otomatik olarak küçülterek kaydeder.</p>
             </div>
-            <div id="recipe-container" style="margin-top:15px;"></div>
+            
+            <div id="recipe-container" style="margin-top:15px;">
+                <label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>
+            </div>
+            
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap:wrap;"><button class="btn-warning" onclick="addRecipeRow()">+ Malzeme Ekle</button><button class="btn-success" id="save-prod-btn" onclick="saveProduct()">📦 Ürünü Kaydet</button><button class="btn-outline" id="cancel-edit-btn" onclick="cancelEdit()" style="display: none;">İptal</button></div>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
@@ -280,7 +284,7 @@
     let tempProductImage = ""; 
     let currentHistoryMatId = null; 
     let productViewMode = 'card'; 
-    let editingProductId = null; // SABİT DEĞİŞKEN
+    let editingProductId = null; 
 
     // ==========================================================================
     // 🚀 OTOMATİK ÜRÜN KODU HESAPLAYICI
@@ -369,7 +373,6 @@
         const p = parseFloat(document.getElementById('prod-price').value) || 0; 
         let c = document.getElementById('prod-code').value; 
         
-        // 🚀 Eğer kodu sildiyse veya boş bıraktıysa otomatik hesapla
         if(!c || c.trim() === '') c = getNextProductCode(); 
 
         const ig = document.getElementById('prod-ig-link').value; 
@@ -405,12 +408,14 @@
         editingProductId = null; 
         document.getElementById('prod-name').value = ''; 
         document.getElementById('prod-price').value = ''; 
-        // 🚀 İPTAL EDİNCE VEYA SIFIRLANINCA YENİ OTOMATİK KODU GETİR
         document.getElementById('prod-code').value = getNextProductCode(); 
         document.getElementById('prod-ig-link').value = ''; 
         removeTempImage(); 
-        const c = document.getElementById('recipe-container'); c.innerHTML = '<label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>'; 
-        addRecipeRow(); 
+        
+        // 🚀 İPTAL EDİLDİĞİNDE SADECE BAŞLIĞI KOYAR, SATIR EKLEMEZ
+        const c = document.getElementById('recipe-container'); 
+        c.innerHTML = '<label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>'; 
+        
         document.getElementById('cancel-edit-btn').style.display = 'none'; 
     }
 
@@ -420,7 +425,6 @@
         editProduct(id); 
         editingProductId = null; 
         document.getElementById('prod-name').value = pr.name + " (Kopya)"; 
-        // 🚀 KOPYALAYINCA OTOMATİK OLARAK SIRADAKİ YENİ KODU ATA
         document.getElementById('prod-code').value = getNextProductCode(); 
     }
     
@@ -585,9 +589,6 @@
         worstSellers.forEach(p => { deadStockBody.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class="badge badge-warning">${p.stock} Adet</span></td><td><span class="badge badge-danger">${p.sold} Adet Satıldı</span></td></tr>`; });
         if(worstSellers.length === 0) deadStockBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Harika! Elinizde şişen ölü bir stok bulunmuyor.</td></tr>';
     }
-
-    // İlk açılışta 1 tane malzeme satırı oluştursun
-    addRecipeRow();
 </script>
 </body>
 </html>
