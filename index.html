@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D İş Takip ERP - V34</title>
+    <title>3D İş Takip ERP - V36</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☁️</text></svg>">
     <link rel="apple-touch-icon" href="logo.jpg">
@@ -81,7 +81,6 @@
         <button class="nav-btn" id="tab-btn-finance" onclick="switchTab('finance')" style="color:var(--purple);">📊 6. Finans & Analiz</button>
     </div>
 
-    <!-- SEKME 1: HAMMADDELER VE FİRE -->
     <div id="tab-materials">
         <div class="grid-3">
             <div class="card">
@@ -101,7 +100,7 @@
                 <button onclick="createNewMaterial()" style="width:100%">Kataloğa Ekle</button>
             </div>
             <div class="card" style="border-top: 4px solid var(--success);">
-                <h3 style="margin-bottom: 10px;">Stok Alımı Yap</h3>
+                <h3 style="margin-bottom: 10px;">Toplu Stok Alımı Yap</h3>
                 <div class="form-group"><select id="log-mat-select"></select></div>
                 <div class="grid-2"><div class="form-group"><input type="number" id="log-qty" placeholder="Miktar (Gr/Adet)"></div><div class="form-group"><input type="number" id="log-price" placeholder="Toplam Tutar (₺)"></div></div>
                 <div class="form-group"><input type="date" id="log-date"></div>
@@ -116,13 +115,12 @@
         </div>
         <div class="card table-responsive">
             <table>
-                <thead><tr><th>Hammadde Adı</th><th>Birim</th><th>Güncel Stok</th><th>Uyarı Sınırı</th><th>Ort. Maliyet</th><th>İşlemler</th></tr></thead>
+                <thead><tr><th>Hammadde Adı</th><th>Birim</th><th>Stok <span style="font-size:10px; color:#777;">(Sınır)</span></th><th>Ort. Maliyet</th><th>⚡ Hızlı Alım</th><th>İşlemler</th></tr></thead>
                 <tbody id="inventory-list"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- SEKME 2: ÜRÜNLER -->
     <div id="tab-products" style="display: none;">
         <div class="card" id="recipe-builder-card" style="border-left: 4px solid var(--accent);">
             <h3 id="recipe-form-title">Yeni Ürün / Reçete Oluştur</h3>
@@ -153,7 +151,6 @@
             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <button class="btn-info" onclick="openProductionHistory()" style="background-color: var(--primary);">🕒 Üretim Geçmişi</button>
                 <input type="text" id="product-search-input" placeholder="🔍 Kod veya İsim Ara..." oninput="refreshUI()" style="padding: 10px 12px; border: 1px solid #ccd1d9; border-radius: 8px; font-size: 14px; min-width: 220px;">
-                <!-- YENİ SIK KULLANILANLAR BUTONU -->
                 <button id="fav-filter-btn" class="btn-outline" onclick="toggleFavoriteFilter()">⭐ Sık Kullanılanlar</button>
                 <button class="btn-outline" onclick="toggleProductView()">🔄 Görünüm</button>
             </div>
@@ -161,7 +158,6 @@
         <div id="product-list-container"></div>
     </div>
 
-    <!-- SEKME 3, 4, 5, 6... -->
     <div id="tab-queue" style="display: none;">
         <div class="card" style="margin-bottom:15px; padding:15px;"><div class="grid-3" style="align-items:flex-end;"><div class="form-group" style="margin:0;"><label>Hızlı Görev Ekle</label><select id="q-add-select"></select></div><div class="form-group" style="margin:0;"><label>Adet</label><input type="number" id="q-add-qty" value="1"></div><button onclick="addToQueueFromSelect()" style="height:44px;">Pano'ya At</button></div></div>
         <div class="kanban-board"><div class="kanban-col"><h4 style="color:var(--secondary)">⏳ Bekleyenler</h4><div id="kb-todo"></div></div><div class="kanban-col"><h4 style="color:var(--warning)">⚙️ Yazıcıda (Üretimde)</h4><div id="kb-progress"></div></div><div class="kanban-col"><h4 style="color:var(--success)">✅ Tamamlandı</h4><div id="kb-done"></div></div></div>
@@ -170,9 +166,14 @@
     </div>
 
     <div id="tab-locations" style="display: none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap;">
+            <h2 style="margin:0;">Bayi ve Vitrin Yönetimi</h2>
+            <button class="btn-warning" onclick="openLocationHistory()">🕒 Bayi İşlem Geçmişi</button>
+        </div>
+        
         <div class="grid-2">
             <div class="card"><h3 style="margin-bottom:10px;">Yeni Bayi Tanımla</h3><div class="form-group"><input type="text" id="new-loc-name" placeholder="Örn: X Kafe"></div><button onclick="createNewLocation()" style="width:100%">Vitrin Ekle</button></div>
-            <div class="card"><h3 style="margin-bottom:10px;">Bayi İşlem Kaydı</h3><div class="grid-2"><div class="form-group"><input type="date" id="loc-log-date"></div><div class="form-group"><select id="loc-select"></select></div></div><div class="form-group"><select id="loc-action-type"><option value="SEND">📦 Merkezden Bayiye Gönder</option><option value="SALE">💰 Bayide Satıldı (Gelir İşle)</option><option value="RETURN">🔄 Bayiden İade Al</option></select></div><div class="form-group"><select id="loc-prod-select" onchange="autoFillPrice()"></select></div><div class="grid-2"><div class="form-group"><input type="number" id="loc-qty" placeholder="Adet"></div><div class="form-group"><input type="number" id="loc-price" placeholder="₺ Fiyat"></div></div><button class="btn-purple" onclick="addLocationLog()" style="width:100%">İşlemi Kaydet</button></div>
+            <div class="card"><h3 style="margin-bottom:10px;">Bayi İşlem Kaydı (Detaylı)</h3><div class="grid-2"><div class="form-group"><input type="date" id="loc-log-date"></div><div class="form-group"><select id="loc-select"></select></div></div><div class="form-group"><select id="loc-action-type"><option value="SEND">📦 Merkezden Bayiye Gönder</option><option value="SALE">💰 Bayide Satıldı (Gelir İşle)</option><option value="RETURN">🔄 Bayiden İade Al</option></select></div><div class="form-group"><select id="loc-prod-select" onchange="autoFillPrice()"></select></div><div class="grid-2"><div class="form-group"><input type="number" id="loc-qty" placeholder="Adet"></div><div class="form-group"><input type="number" id="loc-price" placeholder="₺ Fiyat"></div></div><button class="btn-purple" onclick="addLocationLog()" style="width:100%">İşlemi Kaydet</button></div>
         </div>
         <div id="locations-container"></div>
     </div>
@@ -192,7 +193,6 @@
     </div>
 </div>
 
-<!-- MODALLAR -->
 <div id="editMatModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 style="margin:0;">Hammadde Düzenle</h3><button class="close-btn" onclick="document.getElementById('editMatModal').style.display='none'">✖</button></div>
@@ -232,8 +232,24 @@
         <p style="font-size:12px; color:#7f8c8d; margin-top:0;">Hatalı girdiğiniz üretimi iptal ettiğinizde, harcanan hammaddeler deponuza geri eklenir.</p>
         <div class="table-responsive">
             <table>
-                <thead><tr><th>Tarih</th><th>Ürün Adı</th><th>Adet</th><th>İşlem</th></tr></thead>
+                <thead><tr><th>Tarih</th><th>Ürün Adı</th><th>Adet</th><th>İptal Et</th></tr></thead>
                 <tbody id="prod-history-list"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="locationHistoryModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3 style="margin:0; color:var(--primary);">🕒 Bayi İşlem Geçmişi</h3>
+            <button class="close-btn" onclick="document.getElementById('locationHistoryModal').style.display='none'">✖</button>
+        </div>
+        <p style="font-size:12px; color:#7f8c8d; margin-top:0;">Hatalı satış veya gönderim işlemlerini buradan iptal edebilirsiniz. Sistem gelirleri ve stokları otomatik düzeltir.</p>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Tarih</th><th>Bayi</th><th>Ürün</th><th>İşlem</th><th>Adet</th><th>İptal</th></tr></thead>
+                <tbody id="loc-history-list"></tbody>
             </table>
         </div>
     </div>
@@ -284,20 +300,17 @@
     let currentHistoryMatId = null; 
     let productViewMode = 'card'; 
     let editingProductId = null; 
-    let showOnlyFavorites = false; // YENİ: Favori filtreleme değişkeni
+    let showOnlyFavorites = false; 
 
     function getNextProductCode() {
         let maxNum = 0;
         db.products.forEach(p => {
             if (p.code && p.code.startsWith("M3D-")) {
                 let numPart = parseInt(p.code.replace("M3D-", ""), 10);
-                if (!isNaN(numPart) && numPart > maxNum) {
-                    maxNum = numPart;
-                }
+                if (!isNaN(numPart) && numPart > maxNum) { maxNum = numPart; }
             }
         });
-        maxNum++;
-        return "M3D-" + maxNum.toString().padStart(5, '0');
+        return "M3D-" + (maxNum + 1).toString().padStart(5, '0');
     }
 
     // PROGRAM BAŞLATMA
@@ -338,131 +351,89 @@
     function switchTab(tab) { ['materials', 'products', 'locations', 'finance', 'custom', 'queue'].forEach(t => { document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; document.getElementById('tab-btn-' + t).className = 'nav-btn' + (t === tab ? ' active' : ''); }); refreshUI(); }
     function toggleProductView() { productViewMode = productViewMode === 'card' ? 'list' : 'card'; refreshUI(); }
 
-    // HAMMADDE İŞLEMLERİ
+    // HAMMADDE İŞLEMLERİ & HIZLI ALIM (YENİ)
     function createNewMaterial() { const n = document.getElementById('new-mat-name').value; const unit = document.getElementById('new-mat-unit').value; const color = document.getElementById('new-mat-color').value; const limit = parseInt(document.getElementById('new-mat-limit').value) || 0; if(n) { db.materials.push({ id: 'MAT-'+Date.now(), name: n, unit: unit, color: color, alertLimit: limit }); saveDB(); document.getElementById('new-mat-name').value = ''; document.getElementById('new-mat-limit').value = ''; document.getElementById('new-mat-color').selectedIndex = 0; document.getElementById('new-mat-color-preview').style.backgroundColor = siteColors[0].rgb; refreshUI(); } }
     function editMaterial(id) { const mat = db.materials.find(m => m.id === id); if(!mat) return; document.getElementById('edit-mat-id').value = id; document.getElementById('edit-mat-name').value = mat.name; document.getElementById('edit-mat-unit').value = mat.unit || 'gr'; document.getElementById('edit-mat-color').value = mat.color || 'transparent'; document.getElementById('edit-mat-color-preview').style.backgroundColor = mat.color || 'transparent'; document.getElementById('edit-mat-limit').value = mat.alertLimit || 0; document.getElementById('editMatModal').style.display = 'flex'; }
     function saveEditedMaterial() { const id = document.getElementById('edit-mat-id').value; const name = document.getElementById('edit-mat-name').value; const unit = document.getElementById('edit-mat-unit').value; const color = document.getElementById('edit-mat-color').value; const limit = parseInt(document.getElementById('edit-mat-limit').value) || 0; if(!name) return; const mat = db.materials.find(m => m.id === id); if(mat) { mat.name = name.trim(); mat.unit = unit; mat.color = color; mat.alertLimit = limit; saveDB(); refreshUI(); document.getElementById('editMatModal').style.display = 'none'; } }
+    
+    function quickAddStock(matId) {
+        const q = parseFloat(document.getElementById(`q-mat-qty-${matId}`).value);
+        const p = parseFloat(document.getElementById(`q-mat-price-${matId}`).value) || 0;
+        if(!q || q <= 0) return alert("Lütfen alınacak miktarı girin!");
+        const d = new Date().toISOString().slice(0,10);
+        db.stockLogs.push({id: 'LOG-'+Date.now(), matId: matId, date: d, type: 'IN', qty: q, price: p});
+        saveDB(); refreshUI();
+    }
+    
     function addStockLog() { const m = document.getElementById('log-mat-select').value; const q = parseFloat(document.getElementById('log-qty').value); const p = parseFloat(document.getElementById('log-price').value); const d = document.getElementById('log-date').value; if(m && q && d) { db.stockLogs.push({id: 'LOG-'+Date.now(), matId: m, date: d, type: 'IN', qty: q, price: p}); saveDB(); document.getElementById('log-qty').value = ''; document.getElementById('log-price').value = ''; refreshUI(); } }
-    function openMaterialHistory(matId) { currentHistoryMatId = matId; const mat = db.materials.find(m => m.id === matId); if(!mat) return; document.getElementById('mat-history-title').innerText = `📦 ${mat.name} - Hareket Geçmişi`; const tbody = document.getElementById('mat-history-list'); tbody.innerHTML = ''; const logs = db.stockLogs.filter(l => l.matId === matId).slice().reverse(); if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Bu hammaddenin henüz hiçbir alım/kullanım kaydı yok.</td></tr>'; } else { logs.forEach(l => { const typeLabel = l.type === 'IN' ? '<span style="color:var(--success);font-weight:bold;">🟢 Yeni Alım</span>' : '<span style="color:var(--danger);font-weight:bold;">🔴 Çıkış</span>'; const priceLabel = l.type === 'IN' ? `${(l.price||0).toFixed(2)} ₺` : '-'; tbody.innerHTML += `<tr><td>${l.date}</td><td>${typeLabel}</td><td><b>${l.qty} ${mat.unit||'gr'}</b></td><td>${priceLabel}</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteStockLog('${l.id}')">🗑️ Sil</button></td></tr>`; }); } document.getElementById('materialHistoryModal').style.display = 'flex'; }
-    function deleteStockLog(logId) { if(confirm("Bu hareketi silmek istediğinize emin misiniz? Silinirse sistem hammadde miktarını ve kâr oranını tekrar hesaplayacaktır.")) { db.stockLogs = db.stockLogs.filter(l => l.id !== logId); saveDB(); if(currentHistoryMatId) openMaterialHistory(currentHistoryMatId); refreshUI(); } }
+    function openMaterialHistory(matId) { currentHistoryMatId = matId; const mat = db.materials.find(m => m.id === matId); if(!mat) return; document.getElementById('mat-history-title').innerText = `📦 ${mat.name} - Hareket Geçmişi`; const tbody = document.getElementById('mat-history-list'); tbody.innerHTML = ''; const logs = db.stockLogs.filter(l => l.matId === matId).slice().reverse(); if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan=\"5\" style=\"text-align:center;\">Bu hammaddenin henüz hiçbir alım/kullanım kaydı yok.</td></tr>'; } else { logs.forEach(l => { const typeLabel = l.type === 'IN' ? '<span style=\"color:var(--success);font-weight:bold;\">🟢 Yeni Alım</span>' : '<span style=\"color:var(--danger);font-weight:bold;\">🔴 Çıkış</span>'; const priceLabel = l.type === 'IN' ? `${(l.price||0).toFixed(2)} ₺` : '-'; tbody.innerHTML += `<tr><td>${l.date}</td><td>${typeLabel}</td><td><b>${l.qty} ${mat.unit||'gr'}</b></td><td>${priceLabel}</td><td><button class=\"btn-danger\" style=\"padding:4px 8px; min-height:0;\" onclick=\"deleteStockLog('${l.id}')\">🗑️ Sil</button></td></tr>`; }); } document.getElementById('materialHistoryModal').style.display = 'flex'; }
+    function deleteStockLog(logId) { if(confirm("Bu hareketi silmek istediğinize emin misiniz?")) { db.stockLogs = db.stockLogs.filter(l => l.id !== logId); saveDB(); if(currentHistoryMatId) openMaterialHistory(currentHistoryMatId); refreshUI(); } }
     function addGlobalWasteLog() { const q = parseFloat(document.getElementById('waste-qty').value); const desc = document.getElementById('waste-desc').value || 'Genel Atık/Fire'; if(q > 0) { let totalGrams = 0; let totalValue = 0; db.materials.forEach(m => { if(m.unit !== 'adet') { const st = calculateMaterialStats(m.id); totalGrams += st.stock; totalValue += (st.stock * st.avgCost); } }); let globalAvgCost = totalGrams > 0 ? (totalValue / totalGrams) : 0; let costOfWaste = globalAvgCost * q; db.wasteLogs.push({id: 'WST-'+Date.now(), date: new Date().toISOString().slice(0,10), qty: q, cost: costOfWaste, desc: desc}); saveDB(); document.getElementById('waste-qty').value = ''; document.getElementById('waste-desc').value = ''; alert(`${q} gr Genel Fire kaydedildi.`); refreshUI(); } }
-    function openWasteHistory() { const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = ''; if(db.wasteLogs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Henüz fire kaydı bulunmuyor.</td></tr>'; } else { db.wasteLogs.slice().reverse().forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.qty} gr</b></td><td style="color:var(--danger)">${w.cost.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteWasteLog('${w.id}')">🗑️</button></td></tr>`; }); } document.getElementById('wasteHistoryModal').style.display = 'flex'; }
+    function openWasteHistory() { const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = ''; if(db.wasteLogs.length === 0) { tbody.innerHTML = '<tr><td colspan=\"5\" style=\"text-align:center;\">Henüz fire kaydı bulunmuyor.</td></tr>'; } else { db.wasteLogs.slice().reverse().forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.qty} gr</b></td><td style=\"color:var(--danger)\">${w.cost.toFixed(2)} ₺</td><td><button class=\"btn-danger\" style=\"padding:4px 8px; min-height:0;\" onclick=\"deleteWasteLog('${w.id}')\">🗑️</button></td></tr>`; }); } document.getElementById('wasteHistoryModal').style.display = 'flex'; }
     function deleteWasteLog(id) { if(confirm("İptal etmek istiyor musunuz?")) { db.wasteLogs = db.wasteLogs.filter(w => w.id !== id); saveDB(); openWasteHistory(); refreshUI(); } }
     function calculateMaterialStats(matId) { let s = 0, c = 0, p = 0; db.stockLogs.forEach(l => { if(l.matId === matId) { if(l.type === 'IN') { s += l.qty; c += (l.price || 0); p += l.qty; } else { s -= l.qty; } } }); return { stock: s, avgCost: p > 0 ? (c / p) : 0 }; }
-    function deleteMaterial(id) { const usedInLogs = db.stockLogs.some(l => l.matId === id); const usedInRecipes = db.products.some(p => p.recipe.some(r => r.matId === id)); if (usedInLogs || usedInRecipes) { alert("⚠️ BU HAMMADDE SİLİNEMEZ!\n\nÇünkü geçmişte bu hammaddeye ait alım yapılmış veya bir ürünün reçetesine eklenmiş."); return; } if (confirm("Bu hammaddeyi tamamen silmek istediğinize emin misiniz?")) { db.materials = db.materials.filter(m => m.id !== id); saveDB(); refreshUI(); } }
+    function deleteMaterial(id) { const usedInLogs = db.stockLogs.some(l => l.matId === id); const usedInRecipes = db.products.some(p => p.recipe.some(r => r.matId === id)); if (usedInLogs || usedInRecipes) { alert("⚠️ BU HAMMADDE SİLİNEMEZ!\nÇünkü geçmişte bu hammaddeye ait alım yapılmış veya bir ürünün reçetesine eklenmiş."); return; } if (confirm("Bu hammaddeyi tamamen silmek istediğinize emin misiniz?")) { db.materials = db.materials.filter(m => m.id !== id); saveDB(); refreshUI(); } }
     
     // REÇETE SİSTEMİ
     function updateRecipeInputUnit(selectElem) { const opt = selectElem.options[selectElem.selectedIndex]; const unit = opt.getAttribute('data-unit') || 'gr'; const col = opt.getAttribute('data-color') || 'transparent'; selectElem.parentElement.nextElementSibling.querySelector('input').placeholder = `Miktar (${unit})`; const dot = selectElem.parentElement.querySelector('.recipe-color-preview'); if(dot) dot.style.backgroundColor = col; }
-    function addRecipeRow(m='', q='') { const c = document.getElementById('recipe-container'); const r = 'row-' + Date.now() + Math.random().toString(36).substr(2,5); let o = '<option value="" data-unit="gr" data-color="transparent">-Malzeme-</option>'; let sUnit = 'gr'; let sColor = 'transparent'; db.materials.forEach(mat => { const u = mat.unit || 'gr'; const col = mat.color || 'transparent'; if(mat.id === m) { sUnit = u; sColor = col; } o += `<option value="${mat.id}" data-unit="${u}" data-color="${col}" ${mat.id === m ? 'selected' : ''}>${mat.name} (${u})</option>`; }); c.insertAdjacentHTML('beforeend', `<div class="recipe-row" id="${r}"><div class="form-group" style="display:flex; align-items:center; gap:8px;"><span class="color-dot recipe-color-preview" style="background-color:${sColor}; margin:0; width:16px; height:16px; min-width:16px;"></span><select class="recipe-mat-select" style="flex:1;" onchange="updateRecipeInputUnit(this)">${o}</select></div><div class="form-group"><input type="number" class="recipe-qty-input" placeholder="Miktar (${sUnit})" value="${q}"></div><button class="btn-danger" onclick="document.getElementById('${r}').remove()">X</button></div>`); }
+    function addRecipeRow(m='', q='') { const c = document.getElementById('recipe-container'); const r = 'row-' + Date.now() + Math.random().toString(36).substr(2,5); let o = '<option value=\"\" data-unit=\"gr\" data-color=\"transparent\">-Malzeme-</option>'; let sUnit = 'gr'; let sColor = 'transparent'; db.materials.forEach(mat => { const u = mat.unit || 'gr'; const col = mat.color || 'transparent'; if(mat.id === m) { sUnit = u; sColor = col; } o += `<option value=\"${mat.id}\" data-unit=\"${u}\" data-color=\"${col}\" ${mat.id === m ? 'selected' : ''}>${mat.name} (${u})</option>`; }); c.insertAdjacentHTML('beforeend', `<div class=\"recipe-row\" id=\"${r}\"><div class=\"form-group\" style=\"display:flex; align-items:center; gap:8px;\"><span class=\"color-dot recipe-color-preview\" style=\"background-color:${sColor}; margin:0; width:16px; height:16px; min-width:16px;\"></span><select class=\"recipe-mat-select\" style=\"flex:1;\" onchange=\"updateRecipeInputUnit(this)\">${o}</select></div><div class=\"form-group\"><input type=\"number\" class=\"recipe-qty-input\" placeholder=\"Miktar (${sUnit})\" value=\"${q}\"></div><button class=\"btn-danger\" onclick=\"document.getElementById('${r}').remove()\">X</button></div>`); }
 
     document.getElementById('prod-image-upload').addEventListener('change', function(e) { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(event) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_WIDTH = 250; const scaleSize = MAX_WIDTH / img.width; canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); tempProductImage = canvas.toDataURL('image/jpeg', 0.6); document.getElementById('image-preview').src = tempProductImage; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block'; } ; img.src = event.target.result; } ; reader.readAsDataURL(file); });
     function removeTempImage() { tempProductImage = ""; document.getElementById('prod-image-upload').value = ""; document.getElementById('image-preview').style.display = 'none'; document.getElementById('image-preview').src = ""; document.getElementById('remove-img-btn').style.display = 'none'; }
 
-    // ==========================================================================
-    // 🚀 YENİ FAVORİ SİSTEMİ MANTIĞI
-    // ==========================================================================
-    function toggleFavorite(id) {
-        const pr = db.products.find(x => x.id === id);
-        if(pr) {
-            pr.isFavorite = !pr.isFavorite; // Durumu tersine çevir (true ise false, false ise true)
-            saveDB();
-            refreshUI();
-        }
-    }
-
-    function toggleFavoriteFilter() {
-        showOnlyFavorites = !showOnlyFavorites;
-        const btn = document.getElementById('fav-filter-btn');
-        if(showOnlyFavorites) {
-            btn.classList.remove('btn-outline');
-            btn.classList.add('btn-warning');
-        } else {
-            btn.classList.remove('btn-warning');
-            btn.classList.add('btn-outline');
-        }
-        refreshUI();
-    }
+    // FAVORİ SİSTEMİ
+    function toggleFavorite(id) { const pr = db.products.find(x => x.id === id); if(pr) { pr.isFavorite = !pr.isFavorite; saveDB(); refreshUI(); } }
+    function toggleFavoriteFilter() { showOnlyFavorites = !showOnlyFavorites; const btn = document.getElementById('fav-filter-btn'); if(showOnlyFavorites) { btn.classList.remove('btn-outline'); btn.classList.add('btn-warning'); } else { btn.classList.remove('btn-warning'); btn.classList.add('btn-outline'); } refreshUI(); }
 
     // ÜRÜN İŞLEMLERİ 
     function saveProduct() { 
-        const n = document.getElementById('prod-name').value; 
-        const p = parseFloat(document.getElementById('prod-price').value) || 0; 
-        let c = document.getElementById('prod-code').value; 
-        if(!c || c.trim() === '') c = getNextProductCode(); 
-        const ig = document.getElementById('prod-ig-link').value; 
-        if(!n) return alert("Ürün adı girmelisiniz!"); 
-        
-        let r = []; 
-        document.querySelectorAll('.recipe-row').forEach(row => { const m = row.querySelector('.recipe-mat-select').value; const q = parseFloat(row.querySelector('.recipe-qty-input').value); if(m && q) r.push({matId: m, qty: q}); }); 
+        const n = document.getElementById('prod-name').value; const p = parseFloat(document.getElementById('prod-price').value) || 0; 
+        let c = document.getElementById('prod-code').value; if(!c || c.trim() === '') c = getNextProductCode(); 
+        const ig = document.getElementById('prod-ig-link').value; if(!n) return alert("Ürün adı girmelisiniz!"); 
+        let r = []; document.querySelectorAll('.recipe-row').forEach(row => { const m = row.querySelector('.recipe-mat-select').value; const q = parseFloat(row.querySelector('.recipe-qty-input').value); if(m && q) r.push({matId: m, qty: q}); }); 
         if(r.length === 0) return alert("En az 1 malzeme eklemelisiniz!"); 
         
-        if(editingProductId) { 
-            const pr = db.products.find(x => x.id === editingProductId); 
-            pr.name = n; pr.sellPrice = p; pr.code = c; pr.igLink = ig; pr.recipe = r; 
-            if(tempProductImage !== "") pr.image = tempProductImage; 
-            cancelEdit(); 
-        } else { 
-            // isFavorite varsayılan olarak false kaydediliyor
-            db.products.push({id: 'PROD-'+Date.now(), name: n, sellPrice: p, code: c, igLink: ig, image: tempProductImage, recipe: r, finishedStock: 0, isFavorite: false}); 
-            cancelEdit(); 
-        } 
+        if(editingProductId) { const pr = db.products.find(x => x.id === editingProductId); pr.name = n; pr.sellPrice = p; pr.code = c; pr.igLink = ig; pr.recipe = r; if(tempProductImage !== "") pr.image = tempProductImage; cancelEdit(); } 
+        else { db.products.push({id: 'PROD-'+Date.now(), name: n, sellPrice: p, code: c, igLink: ig, image: tempProductImage, recipe: r, finishedStock: 0, isFavorite: false}); cancelEdit(); } 
         saveDB(); refreshUI(); 
     }
     
     function editProduct(id) { 
         const pr=db.products.find(x=>x.id===id); if(!pr)return; editingProductId=id; 
-        document.getElementById('prod-name').value=pr.name; document.getElementById('prod-price').value=pr.sellPrice; 
-        document.getElementById('prod-code').value=pr.code || ""; document.getElementById('prod-ig-link').value=pr.igLink || "";
+        document.getElementById('prod-name').value=pr.name; document.getElementById('prod-price').value=pr.sellPrice; document.getElementById('prod-code').value=pr.code || ""; document.getElementById('prod-ig-link').value=pr.igLink || "";
         if(pr.image) { tempProductImage = pr.image; document.getElementById('image-preview').src = pr.image; document.getElementById('image-preview').style.display = 'block'; document.getElementById('remove-img-btn').style.display = 'block'; } else { removeTempImage(); }
-        const c = document.getElementById('recipe-container'); c.innerHTML = '<label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>'; 
-        pr.recipe.forEach(i=>addRecipeRow(i.matId, i.qty)); 
-        document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); 
+        const c = document.getElementById('recipe-container'); c.innerHTML = '<label style=\"font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;\">Kullanılacak Malzemeler *</label>'; 
+        pr.recipe.forEach(i=>addRecipeRow(i.matId, i.qty)); document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); 
     }
     
-    function cancelEdit() { 
-        editingProductId = null; 
-        document.getElementById('prod-name').value = ''; 
-        document.getElementById('prod-price').value = ''; 
-        document.getElementById('prod-code').value = getNextProductCode(); 
-        document.getElementById('prod-ig-link').value = ''; 
-        removeTempImage(); 
-        const c = document.getElementById('recipe-container'); 
-        c.innerHTML = '<label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>'; 
-        document.getElementById('cancel-edit-btn').style.display = 'none'; 
-    }
-
-    function cloneProduct(id) { 
-        const pr = db.products.find(x => x.id === id); 
-        if(!pr) return; 
-        editProduct(id); 
-        editingProductId = null; 
-        document.getElementById('prod-name').value = pr.name + " (Kopya)"; 
-        document.getElementById('prod-code').value = getNextProductCode(); 
-    }
-    
+    function cancelEdit() { editingProductId = null; document.getElementById('prod-name').value = ''; document.getElementById('prod-price').value = ''; document.getElementById('prod-code').value = getNextProductCode(); document.getElementById('prod-ig-link').value = ''; removeTempImage(); const c = document.getElementById('recipe-container'); c.innerHTML = '<label style=\"font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;\">Kullanılacak Malzemeler *</label>'; document.getElementById('cancel-edit-btn').style.display = 'none'; }
+    function cloneProduct(id) { const pr = db.products.find(x => x.id === id); if(!pr) return; editProduct(id); editingProductId = null; document.getElementById('prod-name').value = pr.name + " (Kopya)"; document.getElementById('prod-code').value = getNextProductCode(); }
     function deleteProduct(id) { if(confirm("Ürünü silmek istediğinize emin misiniz?")) { db.products = db.products.filter(x => x.id !== id); saveDB(); refreshUI(); } }
 
-    function produceItem(id) { 
-        const pr = db.products.find(x => x.id === id); 
-        const q = parseInt(prompt(`${pr.name} kaç adet üretildi?`)); 
-        if(isNaN(q) || q<=0) return; 
+    // HIZLI ÜRETİM (YENİ)
+    function quickProduce(prodId) {
+        const qInput = document.getElementById(`q-prod-qty-${prodId}`);
+        const q = parseInt(qInput.value);
+        if(isNaN(q) || q <= 0) return alert("Lütfen üretilen adeti girin!");
+        
+        const pr = db.products.find(x => x.id === prodId); 
         let relatedLogIds = []; 
         pr.recipe.forEach(i => { 
-            const newLogId = 'LOG-'+Date.now()+Math.random().toString(36).substr(2,5);
-            relatedLogIds.push(newLogId);
+            const newLogId = 'LOG-'+Date.now()+Math.random().toString(36).substr(2,5); 
+            relatedLogIds.push(newLogId); 
             db.stockLogs.push({id: newLogId, matId: i.matId, date: new Date().toISOString().slice(0,10), type: 'OUT', qty: i.qty * q, price: 0}); 
         }); 
         pr.finishedStock = (pr.finishedStock || 0) + q; 
-        db.productionLogs.push({ id: 'PRODLOG-' + Date.now(), prodId: id, prodName: pr.name, qty: q, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), relatedStockLogs: relatedLogIds });
+        db.productionLogs.push({ id: 'PRODLOG-' + Date.now(), prodId: prodId, prodName: pr.name, qty: q, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), relatedStockLogs: relatedLogIds });
         saveDB(); refreshUI(); 
     }
 
     function openProductionHistory() {
         const tbody = document.getElementById('prod-history-list'); tbody.innerHTML = '';
         if(!db.productionLogs) db.productionLogs = []; const logs = db.productionLogs.slice().reverse();
-        if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Henüz üretim yapılmamış.</td></tr>'; } else {
+        if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan=\"4\" style=\"text-align:center;\">Henüz üretim yapılmamış.</td></tr>'; } else {
             logs.forEach(l => { const pr = db.products.find(p => p.id === l.prodId); const pName = pr ? pr.name : l.prodName + " (Silinmiş)";
-                tbody.innerHTML += `<tr><td>${l.date}</td><td><b>${pName}</b></td><td><span style="color:var(--success); font-weight:bold;">+${l.qty} Adet</span></td><td><button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="cancelProduction('${l.id}')">🔄 Geri Al</button></td></tr>`;
+                tbody.innerHTML += `<tr><td>${l.date}</td><td><b>${pName}</b></td><td><span style=\"color:var(--success); font-weight:bold;\">+${l.qty} Adet</span></td><td><button class=\"btn-danger\" style=\"padding:4px 8px; font-size:12px;\" onclick=\"cancelProduction('${l.id}')\">🔄 Geri Al</button></td></tr>`;
             });
         } document.getElementById('productionHistoryModal').style.display = 'flex';
     }
@@ -473,7 +444,7 @@
         const pr = db.products.find(x => x.id === pLog.prodId);
         if(pr) pr.finishedStock = Math.max(0, (pr.finishedStock || 0) - pLog.qty);
         if(pLog.relatedStockLogs && pLog.relatedStockLogs.length > 0) db.stockLogs = db.stockLogs.filter(log => !pLog.relatedStockLogs.includes(log.id));
-        db.productionLogs = db.productionLogs.filter(x => x.id !== logId); saveDB(); openProductionHistory(); refreshUI(); alert("Üretim iptal edildi! Hammaddeler deponuza döndü.");
+        db.productionLogs = db.productionLogs.filter(x => x.id !== logId); saveDB(); openProductionHistory(); refreshUI(); 
     }
 
     function addToQueueFromSelect() { const id = document.getElementById('q-add-select').value; const q = parseInt(document.getElementById('q-add-qty').value); if(id && q > 0) { const pr = db.products.find(x=>x.id===id); db.queue.push({ id: 'Q-'+Date.now(), type: 'STD', refId: id, name: pr.name, qty: q, status: 'TODO', date: new Date().toISOString().slice(0,10) }); saveDB(); refreshUI(); } }
@@ -487,11 +458,7 @@
                 const pr = db.products.find(x=>x.id===item.refId); 
                 if(pr) { 
                     let relatedLogIds = [];
-                    pr.recipe.forEach(i => { 
-                        const newLogId = 'LOG-'+Date.now()+Math.random().toString(36).substr(2,5);
-                        relatedLogIds.push(newLogId);
-                        db.stockLogs.push({id: newLogId, matId: i.matId, date: new Date().toISOString().slice(0,10), type: 'OUT', qty: i.qty * item.qty, price: 0}); 
-                    }); 
+                    pr.recipe.forEach(i => { const newLogId = 'LOG-'+Date.now()+Math.random().toString(36).substr(2,5); relatedLogIds.push(newLogId); db.stockLogs.push({id: newLogId, matId: i.matId, date: new Date().toISOString().slice(0,10), type: 'OUT', qty: i.qty * item.qty, price: 0}); }); 
                     pr.finishedStock = (pr.finishedStock || 0) + item.qty; 
                     db.productionLogs.push({ id: 'PRODLOG-' + Date.now(), prodId: pr.id, prodName: pr.name, qty: item.qty, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), relatedStockLogs: relatedLogIds });
                 } 
@@ -503,66 +470,129 @@
     function addCustomOrder() { const n = document.getElementById('b2c-name').value; const d = document.getElementById('b2c-desc').value; const p = parseFloat(document.getElementById('b2c-price').value)||0; const dep = parseFloat(document.getElementById('b2c-deposit').value)||0; if(!n || !d) return alert("Ad ve açıklama zorunlu!"); const orderId = 'ORD-'+Date.now(); db.customOrders.push({ id: orderId, name: n, desc: d, price: p, deposit: dep, status: 'BEKLIYOR', date: new Date().toISOString().slice(0,10) }); db.queue.push({ id: 'Q-'+Date.now(), type: 'CUST', refId: orderId, name: `[ÖZEL] ${n} - ${d}`, qty: 1, status: 'TODO', date: new Date().toISOString().slice(0,10) }); saveDB(); document.getElementById('b2c-name').value=''; document.getElementById('b2c-desc').value=''; document.getElementById('b2c-price').value=''; document.getElementById('b2c-deposit').value='0'; alert("Sipariş Panoya eklendi!"); refreshUI(); }
     function updateOrderStatus(id, val) { const o = db.customOrders.find(x=>x.id===id); if(o) { o.status = val; saveDB(); refreshUI(); } }
     function deleteOrder(id) { if(confirm("Silmek istiyor musun?")) { db.customOrders = db.customOrders.filter(x=>x.id!==id); saveDB(); refreshUI(); } }
+    
+    // BAYİ İŞLEMLERİ
     function createNewLocation() { const n = document.getElementById('new-loc-name').value; if(n) { db.locations.push({id: 'LOC-'+Date.now(), name: n.trim()}); saveDB(); document.getElementById('new-loc-name').value = ''; refreshUI(); } }
     function autoFillPrice() { const pId = document.getElementById('loc-prod-select').value; const pr = db.products.find(x => x.id === pId); document.getElementById('loc-price').value = pr ? (pr.sellPrice || 0) : ''; }
-    function addLocationLog() { const d = document.getElementById('loc-log-date').value; const l = document.getElementById('loc-select').value; const t = document.getElementById('loc-action-type').value; const pId = document.getElementById('loc-prod-select').value; const q = parseInt(document.getElementById('loc-qty').value); if(!d || !l || !pId || isNaN(q) || q <= 0) return alert("Eksik!"); const pr = db.products.find(x => x.id === pId); let price = parseFloat(document.getElementById('loc-price').value); if(isNaN(price)) price = pr.sellPrice || 0; if(t === 'SEND') { if((pr.finishedStock || 0) < q) return alert(`Yetersiz Stok!`); pr.finishedStock -= q; } else if (t === 'RETURN') { pr.finishedStock += q; } db.locationLogs.push({ id: 'LLOG-'+Date.now(), timestamp: Date.now(), date: d, locId: l, prodId: pId, type: t, qty: q, price: price }); saveDB(); refreshUI(); }
+    
+    // Klasik detaylı form
+    function addLocationLog() { const d = document.getElementById('loc-log-date').value; const l = document.getElementById('loc-select').value; const t = document.getElementById('loc-action-type').value; const pId = document.getElementById('loc-prod-select').value; const q = parseInt(document.getElementById('loc-qty').value); if(!d || !l || !pId || isNaN(q) || q <= 0) return alert("Eksik!"); const pr = db.products.find(x => x.id === pId); let price = parseFloat(document.getElementById('loc-price').value); if(isNaN(price)) price = pr.sellPrice || 0; if(t === 'SEND') { if((pr.finishedStock || 0) < q) return alert(`Yetersiz Merkez Stok!`); pr.finishedStock -= q; } else if (t === 'RETURN') { pr.finishedStock += q; } db.locationLogs.push({ id: 'LLOG-'+Date.now(), timestamp: Date.now(), date: d, locId: l, prodId: pId, type: t, qty: q, price: price }); saveDB(); refreshUI(); }
+
+    // HIZLI SATIŞ
+    function quickLocationSale(locId, prodId, maxQty) {
+        const q = parseInt(document.getElementById(`q-sale-${locId}-${prodId}`).value);
+        if(isNaN(q) || q <= 0) return alert("Lütfen satılan adeti girin!");
+        if(q > maxQty) return alert(`Rafta sadece ${maxQty} adet var. Daha fazla satılamaz!`);
+        const pr = db.products.find(x => x.id === prodId); const price = pr.sellPrice || 0; const d = new Date().toISOString().slice(0,10);
+        db.locationLogs.push({ id: 'LLOG-'+Date.now(), timestamp: Date.now(), date: d, locId: locId, prodId: prodId, type: 'SALE', qty: q, price: price });
+        saveDB(); refreshUI();
+    }
+
+    // HIZLI GÖNDERİM (YENİ)
+    function quickLocationSend(locId, prodId) {
+        const q = parseInt(document.getElementById(`q-send-${locId}-${prodId}`).value);
+        if(isNaN(q) || q <= 0) return alert("Lütfen gönderilecek adeti girin!");
+        const pr = db.products.find(x => x.id === prodId);
+        if((pr.finishedStock || 0) < q) return alert(`Merkez depoda yeterli ürün yok! (Stok: ${pr.finishedStock || 0})`);
+        
+        pr.finishedStock -= q;
+        const price = pr.sellPrice || 0; const d = new Date().toISOString().slice(0,10);
+        db.locationLogs.push({ id: 'LLOG-'+Date.now(), timestamp: Date.now(), date: d, locId: locId, prodId: prodId, type: 'SEND', qty: q, price: price });
+        saveDB(); refreshUI();
+    }
+
+    // BAYİ İŞLEM GEÇMİŞİ VE İPTAL (YENİ)
+    function openLocationHistory() {
+        const tbody = document.getElementById('loc-history-list'); tbody.innerHTML = '';
+        const logs = db.locationLogs.slice().sort((a,b) => b.timestamp - a.timestamp); 
+        if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan=\"6\" style=\"text-align:center;\">İşlem bulunamadı.</td></tr>'; } else {
+            logs.forEach(l => {
+                const loc = db.locations.find(x => x.id === l.locId); const pr = db.products.find(x => x.id === l.prodId);
+                const locName = loc ? loc.name : "Silinmiş Bayi"; const prName = pr ? pr.name : "Silinmiş Ürün";
+                let typeLabel = '';
+                if(l.type === 'SEND') typeLabel = '<span style=\"color:var(--info); font-weight:bold;\">📦 Gönderim</span>';
+                if(l.type === 'SALE') typeLabel = '<span style=\"color:var(--success); font-weight:bold;\">💰 Satış</span>';
+                if(l.type === 'RETURN') typeLabel = '<span style=\"color:var(--warning); font-weight:bold;\">🔄 İade</span>';
+                
+                tbody.innerHTML += `<tr><td>${l.date}</td><td>${locName}</td><td>${prName}</td><td>${typeLabel}</td><td><b>${l.qty}</b></td><td><button class=\"btn-danger\" style=\"padding:4px 8px; font-size:12px;\" onclick=\"cancelLocationLog('${l.id}')\">🔄 Geri Al</button></td></tr>`;
+            });
+        }
+        document.getElementById('locationHistoryModal').style.display = 'flex';
+    }
+
+    function cancelLocationLog(logId) {
+        if(!confirm("Bu işlemi İPTAL edip verileri eski haline döndürmek istediğinize emin misiniz?")) return;
+        const log = db.locationLogs.find(x => x.id === logId); if(!log) return;
+        const pr = db.products.find(x => x.id === log.prodId);
+        if(pr) {
+            if(log.type === 'SEND') pr.finishedStock += log.qty; // Gönderilen malı merkeze geri al
+            else if (log.type === 'RETURN') pr.finishedStock = Math.max(0, pr.finishedStock - log.qty); // İade alınan malı merkezden geri düş
+            // 'SALE' ise satılan malın silinmesi bayinin dinamik raf stoğunu otomatik artıracak ve net cirodan düşecektir. Ek işlem gerekmez.
+        }
+        db.locationLogs = db.locationLogs.filter(x => x.id !== logId);
+        saveDB(); openLocationHistory(); refreshUI();
+    }
 
     // EKRAN YENİLEME FONKSİYONU
     function refreshUI() {
-        const ms = document.getElementById('log-mat-select'); ms.innerHTML = '<option value="">-Seç-</option>'; 
+        const ms = document.getElementById('log-mat-select'); ms.innerHTML = '<option value=\"\">-Seç-</option>'; 
         const it = document.getElementById('inventory-list'); it.innerHTML = ''; let totalRawValue = 0; let totalWasteLoss = 0;
         
         db.materials.forEach(m => { 
-            const u = m.unit || 'gr'; ms.innerHTML += `<option value="${m.id}" data-unit="${u}">${m.name}</option>`; 
+            const u = m.unit || 'gr'; ms.innerHTML += `<option value=\"${m.id}\" data-unit=\"${u}\">${m.name}</option>`; 
             const st = calculateMaterialStats(m.id); totalRawValue += (st.stock * st.avgCost); 
             const alertLimit = m.alertLimit || 0; const isCritical = st.stock <= alertLimit; 
-            const rowClass = isCritical ? 'class="stock-warning-row"' : ''; 
-            const badgeHTML = isCritical ? `<span class="badge badge-danger" style="margin-left:5px;">⚠️ Uyarı</span>` : ''; 
-            const cDot = m.color && m.color !== 'transparent' ? `<span class="color-dot" style="background-color:${m.color};"></span>` : '';
+            const rowClass = isCritical ? 'class=\"stock-warning-row\"' : ''; 
+            const badgeHTML = isCritical ? `<span class=\"badge badge-danger\" style=\"margin-left:5px;\">⚠️ Uyarı</span>` : ''; 
+            const cDot = m.color && m.color !== 'transparent' ? `<span class=\"color-dot\" style=\"background-color:${m.color};\"></span>` : '';
 
             it.innerHTML += `<tr ${rowClass}>
-                <td>${cDot}${m.name} ${badgeHTML}</td><td>${u.toUpperCase()}</td><td><b>${st.stock}</b></td><td>${alertLimit}</td><td>${st.avgCost.toFixed(3)} ₺</td>
-                <td><div style="display:flex; gap:4px; flex-wrap:wrap;"><button class="btn-info" onclick="openMaterialHistory('${m.id}')" style="padding:6px 10px; min-height:0;" title="Hareket Geçmişini Gör">🕒 Geçmiş</button><button class="btn-warning" onclick="editMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Düzenle">✏️</button><button class="btn-danger" onclick="deleteMaterial('${m.id}')" style="padding:6px; min-height:0;" title="Sil">🗑️</button></div></td>
+                <td>${cDot}${m.name} ${badgeHTML}</td>
+                <td>${u.toUpperCase()}</td>
+                <td><b>${st.stock}</b> <span style=\"color:#777; font-size:10px;\">(${alertLimit})</span></td>
+                <td>${st.avgCost.toFixed(3)} ₺</td>
+                <td>
+                   <div style=\"display:flex; gap:2px; max-width:145px;\">
+                       <input type=\"number\" id=\"q-mat-qty-${m.id}\" placeholder=\"Miktar\" style=\"width:50px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px;\">
+                       <input type=\"number\" id=\"q-mat-price-${m.id}\" placeholder=\"Tutar(₺)\" style=\"width:50px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px;\">
+                       <button class=\"btn-success\" style=\"padding:4px 6px; font-size:11px;\" onclick=\"quickAddStock('${m.id}')\">Al</button>
+                   </div>
+                </td>
+                <td><div style=\"display:flex; gap:4px; flex-wrap:wrap;\"><button class=\"btn-info\" onclick=\"openMaterialHistory('${m.id}')\" style=\"padding:4px 8px; font-size:12px; min-height:0;\" title=\"Hareket Geçmişini Gör\">🕒</button><button class=\"btn-warning\" onclick=\"editMaterial('${m.id}')\" style=\"padding:4px 8px; font-size:12px; min-height:0;\" title=\"Düzenle\">✏️</button><button class=\"btn-danger\" onclick=\"deleteMaterial('${m.id}')\" style=\"padding:4px 8px; font-size:12px; min-height:0;\" title=\"Sil\">🗑️</button></div></td>
             </tr>`; 
         });
         
         db.wasteLogs.forEach(w => { totalWasteLoss += w.cost; });
 
         const plc = document.getElementById('product-list-container'); plc.innerHTML = ''; 
-        const lps = document.getElementById('loc-prod-select'); lps.innerHTML = '<option value="">-Ürün-</option>'; 
-        const qas = document.getElementById('q-add-select'); qas.innerHTML = '<option value="">-Kuyruğa Eklenecek Ürün-</option>';
+        const lps = document.getElementById('loc-prod-select'); lps.innerHTML = '<option value=\"\">-Ürün-</option>'; 
+        const qas = document.getElementById('q-add-select'); qas.innerHTML = '<option value=\"\">-Kuyruğa Eklenecek Ürün-</option>';
         
-        let cardsHTML = '<div class="grid-4">'; 
-        let listHTML = '<div class="table-responsive"><table><thead><tr><th>Resim</th><th>Ürün & Kod</th><th>Malzemeler</th><th>Net Kâr</th><th>Merkez Stok</th><th>İşlemler</th></tr></thead><tbody>';
+        let cardsHTML = '<div class=\"grid-4\">'; 
+        let listHTML = '<div class=\"table-responsive\"><table><thead><tr><th>Resim</th><th>Ürün & Kod</th><th>Malzemeler</th><th>Net Kâr</th><th>Merkez Stok</th><th>Hızlı Üret</th><th>İşlemler</th></tr></thead><tbody>';
         const term = (document.getElementById('product-search-input')?.value || '').toLowerCase(); 
         let productAnalytics = [];
 
-        // 🚀 AKILLI SIRALAMA (Önce favoriler, sonra A-Z)
         let sortedProducts = [...db.products].sort((a, b) => {
-            const favA = a.isFavorite ? 1 : 0;
-            const favB = b.isFavorite ? 1 : 0;
-            if(favA !== favB) return favB - favA; // Favoriler öne
-            return a.name.localeCompare(b.name, 'tr'); // Kendi içinde alfabetik
+            const favA = a.isFavorite ? 1 : 0; const favB = b.isFavorite ? 1 : 0;
+            if(favA !== favB) return favB - favA; 
+            return a.name.localeCompare(b.name, 'tr');
         });
 
         sortedProducts.forEach(p => {
-            // Açılır menüleri (dropdown) da sıralı ve favori işaretli olarak doldurur!
-            const favPrefix = p.isFavorite ? "⭐ " : "";
-            const pCode = p.code ? `[${p.code}] ` : '';
-            lps.innerHTML += `<option value="${p.id}">${favPrefix}${pCode}${p.name} (Stok: ${p.finishedStock || 0})</option>`; 
-            qas.innerHTML += `<option value="${p.id}">${favPrefix}${pCode}${p.name}</option>`;
+            const favPrefix = p.isFavorite ? "⭐ " : ""; const pCode = p.code ? `[${p.code}] ` : '';
+            lps.innerHTML += `<option value=\"${p.id}\">${favPrefix}${pCode}${p.name} (Stok: ${p.finishedStock || 0})</option>`; 
+            qas.innerHTML += `<option value=\"${p.id}\">${favPrefix}${pCode}${p.name}</option>`;
             
-            // Eğer favori filtresi açıksa ve bu ürün favori değilse ekrana basma (atla)
             if (showOnlyFavorites && !p.isFavorite) return;
-            // Eğer arama yapıldıysa ve eşleşmiyorsa atla
             if (!p.name.toLowerCase().includes(term) && !(p.code && p.code.toLowerCase().includes(term))) return; 
 
             let tc = 0; let recipeHTMLCard = ''; let recipeHTMLList = '';
             p.recipe.forEach(i => { 
                 const matCost = calculateMaterialStats(i.matId).avgCost; tc += (matCost * i.qty); 
                 const mat = db.materials.find(m => m.id === i.matId); const matName = mat ? mat.name : 'Silinmiş'; const unit = mat ? (mat.unit || 'gr') : 'gr'; 
-                const cDot = mat && mat.color && mat.color !== 'transparent' ? `<span class="color-dot" style="width:10px; height:10px; background-color:${mat.color}; margin-right:4px;"></span>` : '';
-                recipeHTMLCard += `<div class="product-recipe-item"><span>${cDot}${matName}</span> <b>${i.qty} ${unit}</b></div>`; 
+                const cDot = mat && mat.color && mat.color !== 'transparent' ? `<span class=\"color-dot\" style=\"width:10px; height:10px; background-color:${mat.color}; margin-right:4px;\"></span>` : '';
+                recipeHTMLCard += `<div class=\"product-recipe-item\"><span>${cDot}${matName}</span> <b>${i.qty} ${unit}</b></div>`; 
                 recipeHTMLList += `${cDot}${matName} (${i.qty} ${unit})<br>`; 
             });
             
@@ -571,49 +601,61 @@
             db.locations.forEach(loc => { let sent=0, sold=0, ret=0; db.locationLogs.filter(log => log.locId === loc.id && log.prodId === p.id).forEach(log => { if(log.type === 'SEND') sent += log.qty; if(log.type === 'SALE') sold += log.qty; if(log.type === 'RETURN') ret += log.qty; }); totalSold += sold; totalLocStock += (sent - sold - ret); });
             let totalGlobalStock = (p.finishedStock || 0) + totalLocStock; productAnalytics.push({ id: p.id, name: p.name, sold: totalSold, stock: totalGlobalStock });
             
-            let imageHTML = p.image ? `<img src="${p.image}" class="product-image-thumbnail">` : '';
-            let codeHTML = p.code ? `<div class="product-code-badge">${p.code}</div>` : '';
-            let igHTML = p.igLink ? `<a href="${p.igLink}" target="_blank" class="btn-outline" style="flex:1; text-align:center; padding:10px; text-decoration:none; display:block;">📱 IG Gör</a>` : '';
+            let imageHTML = p.image ? `<img src=\"${p.image}\" class=\"product-image-thumbnail\">` : '';
+            let codeHTML = p.code ? `<div class=\"product-code-badge\">${p.code}</div>` : '';
+            let igHTML = p.igLink ? `<a href=\"${p.igLink}\" target=\"_blank\" class=\"btn-outline\" style=\"flex:1; text-align:center; padding:10px; text-decoration:none; display:block;\">📱 IG Gör</a>` : '';
             
-            // ⭐ Tıklanabilir Yıldız İkonu
             let starIcon = p.isFavorite ? '⭐' : '☆';
-            let favToggleHTML = `<span style="cursor:pointer; font-size:20px; color:${p.isFavorite ? '#f1c40f' : '#bdc3c7'}; user-select:none; margin-right:6px;" onclick="toggleFavorite('${p.id}')" title="Favorilere Ekle/Çıkar">${starIcon}</span>`;
-
-            cardsHTML += `<div class="product-card"><div>${imageHTML}<div class="product-card-header"><div class="product-card-title">${favToggleHTML} ${p.name} ${codeHTML}</div><div style="color:var(--success); font-weight:bold; font-size:14px; text-align:right;">Stok: <br><span style="font-size:18px;">${p.finishedStock || 0}</span></div></div><div class="product-recipe-list"><strong style="display:block; margin-bottom:8px; color:var(--primary);">Kullanılan Malzemeler:</strong>${recipeHTMLCard}</div><div class="product-stats"><div>Maliyet<br><b style="color:var(--danger)">${tc.toFixed(2)} ₺</b></div><div>Satış<br><b style="color:var(--primary)">${(p.sellPrice || 0).toFixed(2)} ₺</b></div><div>Net Kâr<br><b style="color:${profit >= 0 ? 'var(--success)' : 'var(--danger)'}">${profit.toFixed(2)} ₺</b></div></div></div><div class="product-actions"><button style="flex: 1 1 100%; margin-bottom:4px;" class="btn-success" onclick="produceItem('${p.id}')">⚙️ Üret (Stoktan Düş)</button>${igHTML}<button style="flex: 1;" class="btn-purple" onclick="cloneProduct('${p.id}')">📑 Kopya</button><button style="flex: 1;" class="btn-warning" onclick="editProduct('${p.id}')">✏️ Düz.</button><button style="flex: 1;" class="btn-danger" onclick="deleteProduct('${p.id}')">🗑️ Sil</button></div></div>`;
+            let favToggleHTML = `<span style=\"cursor:pointer; font-size:20px; color:${p.isFavorite ? '#f1c40f' : '#bdc3c7'}; user-select:none; margin-right:6px;\" onclick=\"toggleFavorite('${p.id}')\" title=\"Favorilere Ekle/Çıkar\">${starIcon}</span>`;
             
-            let listImgHTML = p.image ? `<img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">` : 'Yok';
-            let listIgHTML = p.igLink ? `<a href="${p.igLink}" target="_blank" title="Instagram">📱</a>` : '';
-            listHTML += `<tr><td>${listImgHTML}</td><td><div style="display:flex; align-items:center;">${favToggleHTML} <strong>${p.name}</strong></div><span style="font-size:10px; color:#777; margin-left:30px;">${p.code || ''}</span></td><td style="font-size: 11px; color: #555;">${recipeHTMLList}</td><td><strong style="color:${profit>=0?'var(--success)':'var(--danger)'}">${profit.toFixed(2)} ₺</strong></td><td><strong style="color:var(--success)">${p.finishedStock||0}</strong></td><td><div style="display:flex; gap:4px; flex-wrap:wrap;"><button onclick="produceItem('${p.id}')" title="Üret">⚙️</button>${listIgHTML}<button class="btn-purple" onclick="cloneProduct('${p.id}')" title="Kopyala">📑</button><button class="btn-warning" onclick="editProduct('${p.id}')" title="Düzenle">✏️</button><button class="btn-danger" onclick="deleteProduct('${p.id}')" title="Sil">🗑️</button></div></td></tr>`;
+            // YENİ HIZLI ÜRETİM ARAYÜZÜ (Kart ve Liste İçin)
+            let quickProduceHTMLCard = `
+            <div style=\"flex: 1 1 100%; display:flex; gap:4px; margin-bottom:4px;\">
+                <input type=\"number\" id=\"q-prod-qty-${p.id}\" placeholder=\"Adet\" min=\"1\" style=\"flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; text-align:center;\">
+                <button class=\"btn-success\" style=\"flex:2; padding:6px;\" onclick=\"quickProduce('${p.id}')\">⚙️ Hızlı Üret</button>
+            </div>`;
+
+            let quickProduceHTMLList = `
+            <div style=\"display:flex; gap:2px;\">
+                <input type=\"number\" id=\"q-prod-qty-list-${p.id}\" placeholder=\"Adet\" min=\"1\" style=\"width:45px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px; text-align:center;\">
+                <button class=\"btn-success\" style=\"padding:4px 6px; font-size:11px;\" onclick=\"document.getElementById('q-prod-qty-${p.id}').value = document.getElementById('q-prod-qty-list-${p.id}').value; quickProduce('${p.id}')\">⚙️ Üret</button>
+            </div>`;
+
+            cardsHTML += `<div class=\"product-card\"><div>${imageHTML}<div class=\"product-card-header\"><div class=\"product-card-title\">${favToggleHTML} ${p.name} ${codeHTML}</div><div style=\"color:var(--success); font-weight:bold; font-size:14px; text-align:right;\">Stok: <br><span style=\"font-size:18px;\">${p.finishedStock || 0}</span></div></div><div class=\"product-recipe-list\"><strong style=\"display:block; margin-bottom:8px; color:var(--primary);\">Kullanılan Malzemeler:</strong>${recipeHTMLCard}</div><div class=\"product-stats\"><div>Maliyet<br><b style=\"color:var(--danger)\">${tc.toFixed(2)} ₺</b></div><div>Satış<br><b style=\"color:var(--primary)\">${(p.sellPrice || 0).toFixed(2)} ₺</b></div><div>Net Kâr<br><b style=\"color:${profit >= 0 ? 'var(--success)' : 'var(--danger)'}\">${profit.toFixed(2)} ₺</b></div></div></div><div class=\"product-actions\">${quickProduceHTMLCard}${igHTML}<button style=\"flex: 1;\" class=\"btn-purple\" onclick=\"cloneProduct('${p.id}')\">📑 Kopya</button><button style=\"flex: 1;\" class=\"btn-warning\" onclick=\"editProduct('${p.id}')\">✏️ Düz.</button><button style=\"flex: 1;\" class=\"btn-danger\" onclick=\"deleteProduct('${p.id}')\">🗑️ Sil</button></div></div>`;
+            
+            let listImgHTML = p.image ? `<img src=\"${p.image}\" style=\"width:40px; height:40px; object-fit:cover; border-radius:4px;\">` : 'Yok';
+            let listIgHTML = p.igLink ? `<a href=\"${p.igLink}\" target=\"_blank\" title=\"Instagram\">📱</a>` : '';
+            listHTML += `<tr><td>${listImgHTML}</td><td><div style=\"display:flex; align-items:center;\">${favToggleHTML} <strong>${p.name}</strong></div><span style=\"font-size:10px; color:#777; margin-left:30px;\">${p.code || ''}</span></td><td style=\"font-size: 11px; color: #555;\">${recipeHTMLList}</td><td><strong style=\"color:${profit>=0?'var(--success)':'var(--danger)'}\">${profit.toFixed(2)} ₺</strong></td><td><strong style=\"color:var(--success)\">${p.finishedStock||0}</strong></td><td>${quickProduceHTMLList}</td><td><div style=\"display:flex; gap:4px; flex-wrap:wrap;\">${listIgHTML}<button class=\"btn-purple\" style=\"padding:4px 8px; font-size:12px;\" onclick=\"cloneProduct('${p.id}')\" title=\"Kopyala\">📑</button><button class=\"btn-warning\" style=\"padding:4px 8px; font-size:12px;\" onclick=\"editProduct('${p.id}')\" title=\"Düzenle\">✏️</button><button class=\"btn-danger\" style=\"padding:4px 8px; font-size:12px;\" onclick=\"deleteProduct('${p.id}')\" title=\"Sil\">🗑️</button></div></td></tr>`;
         });
         
         cardsHTML += '</div>'; listHTML += '</tbody></table></div>'; plc.innerHTML = productViewMode === 'card' ? cardsHTML : listHTML;
 
-        // Üretim Panosu ve Finans 
         const kTodo = document.getElementById('kb-todo'); kTodo.innerHTML = ''; const kProg = document.getElementById('kb-progress'); kProg.innerHTML = ''; const kDone = document.getElementById('kb-done'); kDone.innerHTML = ''; const kArchive = document.getElementById('kb-archive-list'); kArchive.innerHTML = '';
         db.queue.forEach(q => {
             const isCust = q.type === 'CUST';
-            if(q.status === 'ARCHIVED') { kArchive.innerHTML += `<tr><td>${q.date}</td><td><b>${q.name}</b></td><td>${q.qty} Adet</td><td><span class="badge" style="background:#bdc3c7; color:white;">Arşivlendi</span></td></tr>`; return; }
+            if(q.status === 'ARCHIVED') { kArchive.innerHTML += `<tr><td>${q.date}</td><td><b>${q.name}</b></td><td>${q.qty} Adet</td><td><span class=\"badge\" style=\"background:#bdc3c7; color:white;\">Arşivlendi</span></td></tr>`; return; }
             let actHTML = '';
-            if(q.status === 'TODO') actHTML = `<button class="btn-warning" style="font-size:11px; padding:4px;" onclick="changeQStatus('${q.id}','IN_PROGRESS')">Üretime Al ➡️</button> <button class="btn-outline" style="font-size:11px; padding:4px;" onclick="archiveQ('${q.id}')">İptal</button>`;
-            else if(q.status === 'IN_PROGRESS') actHTML = `<button class="btn-outline" style="font-size:11px; padding:4px;" onclick="changeQStatus('${q.id}','TODO')">⬅️ Geri</button> <button class="btn-success" style="font-size:11px; padding:4px;" onclick="finishQItem('${q.id}')">Tamamla ✅</button>`;
-            else actHTML = `<button class="btn-outline" style="font-size:11px; padding:4px;" onclick="changeQStatus('${q.id}','IN_PROGRESS')">⬅️ Geri</button> <button class="btn-danger" style="font-size:11px; padding:4px;" onclick="archiveQ('${q.id}')">Arşivle 🗄️</button>`;
+            if(q.status === 'TODO') actHTML = `<button class=\"btn-warning\" style=\"font-size:11px; padding:4px;\" onclick=\"changeQStatus('${q.id}','IN_PROGRESS')\">Üretime Al ➡️</button> <button class=\"btn-outline\" style=\"font-size:11px; padding:4px;\" onclick=\"archiveQ('${q.id}')\">İptal</button>`;
+            else if(q.status === 'IN_PROGRESS') actHTML = `<button class=\"btn-outline\" style=\"font-size:11px; padding:4px;\" onclick=\"changeQStatus('${q.id}','TODO')\">⬅️ Geri</button> <button class=\"btn-success\" style=\"font-size:11px; padding:4px;\" onclick=\"finishQItem('${q.id}')\">Tamamla ✅</button>`;
+            else actHTML = `<button class=\"btn-outline\" style=\"font-size:11px; padding:4px;\" onclick=\"changeQStatus('${q.id}','IN_PROGRESS')\">⬅️ Geri</button> <button class=\"btn-danger\" style=\"font-size:11px; padding:4px;\" onclick=\"archiveQ('${q.id}')\">Arşivle 🗄️</button>`;
             let pImgHTML = "";
-            if(q.type === 'STD') { const relatedPr = db.products.find(x=>x.id===q.refId); if(relatedPr && relatedPr.image) pImgHTML = `<img src="${relatedPr.image}" style="width:100%; height:80px; object-fit:contain; border-radius:4px; margin-bottom:5px;">`; }
-            const card = `<div class="k-item ${isCust ? 'urgent' : ''}">${pImgHTML}<div style="font-size:11px; color:#999; text-align:right;">${q.date}</div><div style="font-weight:bold; margin-bottom:5px;">${q.name}</div><div style="font-size:13px; color:var(--secondary); margin-bottom:10px;">Miktar: <b>${q.qty} Adet</b></div><div class="k-actions">${actHTML}</div></div>`;
+            if(q.type === 'STD') { const relatedPr = db.products.find(x=>x.id===q.refId); if(relatedPr && relatedPr.image) pImgHTML = `<img src=\"${relatedPr.image}\" style=\"width:100%; height:80px; object-fit:contain; border-radius:4px; margin-bottom:5px;\">`; }
+            const card = `<div class=\"k-item ${isCust ? 'urgent' : ''}\">${pImgHTML}<div style=\"font-size:11px; color:#999; text-align:right;\">${q.date}</div><div style=\"font-weight:bold; margin-bottom:5px;\">${q.name}</div><div style=\"font-size:13px; color:var(--secondary); margin-bottom:10px;\">Miktar: <b>${q.qty} Adet</b></div><div class=\"k-actions\">${actHTML}</div></div>`;
             if(q.status === 'TODO') kTodo.innerHTML += card; else if(q.status === 'IN_PROGRESS') kProg.innerHTML += card; else if(q.status === 'DONE') kDone.innerHTML += card;
         });
-        if(kArchive.innerHTML === '') kArchive.innerHTML = '<tr><td colspan="4" style="text-align:center;">Henüz arşivlenmiş kayıt yok.</td></tr>';
+        if(kArchive.innerHTML === '') kArchive.innerHTML = '<tr><td colspan=\"4\" style=\"text-align:center;\">Henüz arşivlenmiş kayıt yok.</td></tr>';
 
         const b2cList = document.getElementById('custom-orders-list'); b2cList.innerHTML = ''; let b2cTotalRevenue = 0; 
         db.customOrders.forEach(o => {
             if(o.status === 'TESLIM_EDILDI') b2cTotalRevenue += o.price; else b2cTotalRevenue += o.deposit; const kalan = o.price - o.deposit;
-            b2cList.innerHTML += `<tr><td>${o.date}</td><td><b>${o.name}</b></td><td>${o.desc}</td><td style="color:var(--primary)">${o.price} ₺</td><td style="color:var(--success)">${o.deposit} ₺</td><td style="color:var(--danger)">${kalan} ₺</td><td><select onchange="updateOrderStatus('${o.id}', this.value)" style="padding:4px; font-size:12px;"><option value="BEKLIYOR" ${o.status==='BEKLIYOR'?'selected':''}>Bekliyor</option><option value="TESLIM_EDILDI" ${o.status==='TESLIM_EDILDI'?'selected':''}>Teslim Edildi</option><option value="IPTAL" ${o.status==='IPTAL'?'selected':''}>İptal</option></select></td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteOrder('${o.id}')">X</button></td></tr>`;
+            b2cList.innerHTML += `<tr><td>${o.date}</td><td><b>${o.name}</b></td><td>${o.desc}</td><td style=\"color:var(--primary)\">${o.price} ₺</td><td style=\"color:var(--success)\">${o.deposit} ₺</td><td style=\"color:var(--danger)\">${kalan} ₺</td><td><select onchange=\"updateOrderStatus('${o.id}', this.value)\" style=\"padding:4px; font-size:12px;\"><option value=\"BEKLIYOR\" ${o.status==='BEKLIYOR'?'selected':''}>Bekliyor</option><option value=\"TESLIM_EDILDI\" ${o.status==='TESLIM_EDILDI'?'selected':''}>Teslim Edildi</option><option value=\"IPTAL\" ${o.status==='IPTAL'?'selected':''}>İptal</option></select></td><td><button class=\"btn-danger\" style=\"padding:4px 8px; min-height:0;\" onclick=\"deleteOrder('${o.id}')\">X</button></td></tr>`;
         });
 
-        const ls = document.getElementById('loc-select'); ls.innerHTML = '<option value="">-Bayi-</option>'; const lc = document.getElementById('locations-container'); lc.innerHTML = '';
+        const ls = document.getElementById('loc-select'); ls.innerHTML = '<option value=\"\">-Bayi-</option>'; const lc = document.getElementById('locations-container'); lc.innerHTML = '';
         let b2bTotalRevenue = 0; let expectedLocRev = 0; 
+        
         db.locations.forEach(loc => {
-            ls.innerHTML += `<option value="${loc.id}">${loc.name}</option>`; let stats = {}; 
+            ls.innerHTML += `<option value=\"${loc.id}\">${loc.name}</option>`; let stats = {}; 
             db.locationLogs.filter(log => log.locId === loc.id).forEach(log => {
                 const pr = db.products.find(p => p.id === log.prodId); const actP = log.price !== undefined ? log.price : (pr ? (pr.sellPrice || 0) : 0);
                 if(!stats[log.prodId]) stats[log.prodId] = { sent: 0, sentVal: 0, sold: 0, soldVal: 0, ret: 0 };
@@ -621,13 +663,26 @@
                 if(log.type === 'SALE') { stats[log.prodId].sold += log.qty; stats[log.prodId].soldVal += (log.qty * actP); b2bTotalRevenue += (log.qty * actP); }
                 if(log.type === 'RETURN') { stats[log.prodId].ret += log.qty; }
             });
-            let invHTML = `<div class="table-responsive"><table><thead><tr><th>Ürün</th><th>Raflı</th><th>Satılan</th><th>Ciro</th></tr></thead><tbody>`; let hs = false;
+            let invHTML = `<div class=\"table-responsive\"><table><thead><tr><th>Ürün</th><th>Raflı</th><th>Satılan</th><th>Hızlı Sat / Gönder</th></tr></thead><tbody>`; let hs = false;
             Object.keys(stats).forEach(prodId => {
                 const pr = db.products.find(p => p.id === prodId);
-                if(pr) { const st = stats[prodId]; const cur = st.sent - st.sold - st.ret; const avgSP = st.sent > 0 ? (st.sentVal / st.sent) : (pr.sellPrice || 0); expectedLocRev += (cur * avgSP); if(st.sent > 0) { hs=true; invHTML += `<tr><td>${pr.name}</td><td><b>${cur}</b></td><td><b style="color:var(--success)">${st.sold}</b></td><td>${st.soldVal.toFixed(2)}₺</td></tr>`; } }
+                if(pr) { 
+                    const st = stats[prodId]; const cur = st.sent - st.sold - st.ret; const avgSP = st.sent > 0 ? (st.sentVal / st.sent) : (pr.sellPrice || 0); expectedLocRev += (cur * avgSP); 
+                    if(st.sent > 0) { 
+                        hs=true; 
+                        
+                        let quickOpsHTML = `
+                        <div style=\"display:flex; flex-direction:column; gap:4px;\">
+                            ${cur > 0 ? `<div style=\"display:flex; gap:4px;\"><input type=\"number\" id=\"q-sale-${loc.id}-${prodId}\" style=\"width:45px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px; text-align:center;\" placeholder=\"Adet\" min=\"1\" max=\"${cur}\"><button class=\"btn-success\" style=\"padding:4px 8px; min-height:0; font-size:11px;\" onclick=\"quickLocationSale('${loc.id}','${prodId}',${cur})\">💰 Sat</button></div>` : '<span style=\"font-size:11px; color:#e74c3c; font-weight:bold;\">Rafta Bitti</span>'}
+                            <div style=\"display:flex; gap:4px;\"><input type=\"number\" id=\"q-send-${loc.id}-${prodId}\" style=\"width:45px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px; text-align:center;\" placeholder=\"Adet\" min=\"1\"><button class=\"btn-info\" style=\"padding:4px 8px; min-height:0; font-size:11px;\" onclick=\"quickLocationSend('${loc.id}','${prodId}')\">📦 Gönder</button></div>
+                        </div>`;
+
+                        invHTML += `<tr><td>${pr.name}</td><td><b>${cur}</b></td><td><b style=\"color:var(--success)\">${st.sold}</b></td><td>${quickOpsHTML}</td></tr>`; 
+                    } 
+                }
             });
-            invHTML += hs ? `</tbody></table></div>` : `<tr><td colspan="4" style="text-align:center;">Ürün yok.</td></tr></tbody></table></div>`;
-            lc.innerHTML += `<div class="card" style="padding:15px;"><h3 style="margin-bottom:10px;">🏬 ${loc.name}</h3>${invHTML}</div>`;
+            invHTML += hs ? `</tbody></table></div>` : `<tr><td colspan=\"4\" style=\"text-align:center;\">Ürün yok. Lütfen yukarıdaki formdan ilk gönderimi yapın.</td></tr></tbody></table></div>`;
+            lc.innerHTML += `<div class=\"card\" style=\"padding:15px;\"><h3 style=\"margin-bottom:10px;\">🏬 ${loc.name}</h3>${invHTML}</div>`;
         });
 
         let totalExpense = 0; db.stockLogs.forEach(l => { if(l.type === 'IN') totalExpense += (l.price || 0); });
@@ -649,10 +704,10 @@
         bestSellersBody.innerHTML = ''; deadStockBody.innerHTML = '';
         let topSellers = [...productAnalytics].sort((a, b) => b.sold - a.sold).slice(0, 5); let worstSellers = [...productAnalytics].filter(p => p.stock > 0).sort((a, b) => a.sold - b.sold).slice(0, 5);
 
-        topSellers.forEach(p => { bestSellersBody.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class="badge badge-info" style="font-size:14px;">${p.sold} Adet</span></td></tr>`; });
-        if(topSellers.length === 0 || topSellers[0].sold === 0) bestSellersBody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Henüz yeterli satış verisi yok.</td></tr>';
-        worstSellers.forEach(p => { deadStockBody.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class="badge badge-warning">${p.stock} Adet</span></td><td><span class="badge badge-danger">${p.sold} Adet Satıldı</span></td></tr>`; });
-        if(worstSellers.length === 0) deadStockBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Harika! Elinizde şişen ölü bir stok bulunmuyor.</td></tr>';
+        topSellers.forEach(p => { bestSellersBody.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class=\"badge badge-info\" style=\"font-size:14px;\">${p.sold} Adet</span></td></tr>`; });
+        if(topSellers.length === 0 || topSellers[0].sold === 0) bestSellersBody.innerHTML = '<tr><td colspan=\"2\" style=\"text-align:center;\">Henüz yeterli satış verisi yok.</td></tr>';
+        worstSellers.forEach(p => { deadStockBody.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class=\"badge badge-warning\">${p.stock} Adet</span></td><td><span class=\"badge badge-danger\">${p.sold} Adet Satıldı</span></td></tr>`; });
+        if(worstSellers.length === 0) deadStockBody.innerHTML = '<tr><td colspan=\"3\" style=\"text-align:center;\">Harika! Elinizde şişen ölü bir stok bulunmuyor.</td></tr>';
     }
 </script>
 </body>
