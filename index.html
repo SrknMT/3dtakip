@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D İş Takip ERP - V36</title>
+    <title>3D İş Takip</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☁️</text></svg>">
     <link rel="apple-touch-icon" href="logo.jpg">
@@ -173,7 +173,7 @@
         
         <div class="grid-2">
             <div class="card"><h3 style="margin-bottom:10px;">Yeni Bayi Tanımla</h3><div class="form-group"><input type="text" id="new-loc-name" placeholder="Örn: X Kafe"></div><button onclick="createNewLocation()" style="width:100%">Vitrin Ekle</button></div>
-            <div class="card"><h3 style="margin-bottom:10px;">Bayi İşlem Kaydı (Detaylı)</h3><div class="grid-2"><div class="form-group"><input type="date" id="loc-log-date"></div><div class="form-group"><select id="loc-select"></select></div></div><div class="form-group"><select id="loc-action-type"><option value="SEND">📦 Merkezden Bayiye Gönder</option><option value="SALE">💰 Bayide Satıldı (Gelir İşle)</option><option value="RETURN">🔄 Bayiden İade Al</option></select></div><div class="form-group"><select id="loc-prod-select" onchange="autoFillPrice()"></select></div><div class="grid-2"><div class="form-group"><input type="number" id="loc-qty" placeholder="Adet"></div><div class="form-group"><input type="number" id="loc-price" placeholder="₺ Fiyat"></div></div><button class="btn-purple" onclick="addLocationLog()" style="width:100%">İşlemi Kaydet</button></div>
+            <div class="card"><h3 style="margin-bottom:10px;">Bayi İşlem Kaydı (Detaylı)</h3><div class="grid-2"><div class="form-group"><input type="date" id="loc-log-date"></div><div class="form-group"><select id="loc-select"></select></div></div><div class="form-group"><select id="loc-action-type"><option value="SEND">📦 Merkezden Bayiye Gönder</option><option value="SALE">💰 Bayide Satıldı (İstatistik)</option><option value="RETURN">🔄 Bayiden İade Al</option></select></div><div class="form-group"><select id="loc-prod-select" onchange="autoFillPrice()"></select></div><div class="grid-2"><div class="form-group"><input type="number" id="loc-qty" placeholder="Adet"></div><div class="form-group"><input type="number" id="loc-price" placeholder="₺ Fiyat"></div></div><button class="btn-purple" onclick="addLocationLog()" style="width:100%">İşlemi Kaydet</button></div>
         </div>
         <div id="locations-container"></div>
     </div>
@@ -184,10 +184,10 @@
     </div>
 
     <div id="tab-finance" style="display: none;">
-        <h2 style="margin-top: 0;">Nakit Akışı (Gerçekleşen)</h2>
+        <h2 style="margin-top: 0;">Nakit Akışı (Toptan Peşin Model)</h2>
         <div class="grid-4" style="margin-bottom: 20px;"><div class="stat-card red"><div class="title">Hammadde Alımı (Gider)</div><div class="value" id="fin-total-expense">0 ₺</div></div><div class="stat-card green"><div class="title">Satışlar (Gelir)</div><div class="value" id="fin-total-revenue">0 ₺</div></div><div class="stat-card blue"><div class="title">Net Nakit (Kasa)</div><div class="value" id="fin-net-cash">0 ₺</div></div><div class="stat-card dark"><div class="title">Fire / Çöp Zararı</div><div class="value" id="fin-waste-loss" style="color:#ff7979">0 ₺</div></div></div>
-        <h2>Varlıklar ve Beklentiler</h2>
-        <div class="grid-4" style="margin-bottom: 25px;"><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Depo Hammadde Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-raw-value">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Basılmış Ürün Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--danger);" id="fin-prod-cost">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Bekleyen Toplam Ciro</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-prod-value">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Gelecek Net Kâr</h3><div style="font-size: 22px; font-weight: bold; color: var(--success);" id="fin-prod-profit">0 ₺</div></div></div>
+        <h2>Varlıklar ve Beklentiler (Sadece Merkez Depo)</h2>
+        <div class="grid-4" style="margin-bottom: 25px;"><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Depo Hammadde Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-raw-value">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Merkezdeki Ürün Maliyeti</h3><div style="font-size: 22px; font-weight: bold; color: var(--danger);" id="fin-prod-cost">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Merkezdeki Ürün Ciro Değeri</h3><div style="font-size: 22px; font-weight: bold; color: var(--primary);" id="fin-prod-value">0 ₺</div></div><div class="card"><h3 style="font-size:14px; margin:0; color:#7f8fa6;">Gelecek Net Kâr (Merkez)</h3><div style="font-size: 22px; font-weight: bold; color: var(--success);" id="fin-prod-profit">0 ₺</div></div></div>
         <h2 style="border-top: 2px solid #eee; padding-top: 20px;">📈 Satış ve Stok Analizi</h2>
         <div class="grid-2"><div class="card"><h3 style="color:var(--success); margin-top:0;">🏆 En Çok Satan 5 Ürün</h3><div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Toplam Satış</th></tr></thead><tbody id="analytics-best-sellers"></tbody></table></div></div><div class="card"><h3 style="color:var(--danger); margin-top:0;">🛑 Ölü Stok (Hareketsiz) 5 Ürün</h3><div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Toplam Stok</th><th>Satış</th></tr></thead><tbody id="analytics-dead-stock"></tbody></table></div></div></div>
     </div>
@@ -245,7 +245,7 @@
             <h3 style="margin:0; color:var(--primary);">🕒 Bayi İşlem Geçmişi</h3>
             <button class="close-btn" onclick="document.getElementById('locationHistoryModal').style.display='none'">✖</button>
         </div>
-        <p style="font-size:12px; color:#7f8c8d; margin-top:0;">Hatalı satış veya gönderim işlemlerini buradan iptal edebilirsiniz. Sistem gelirleri ve stokları otomatik düzeltir.</p>
+        <p style="font-size:12px; color:#7f8c8d; margin-top:0;">Hatalı işlemleri buradan iptal edebilirsiniz. Sistem gelirleri ve stokları otomatik düzeltir.</p>
         <div class="table-responsive">
             <table>
                 <thead><tr><th>Tarih</th><th>Bayi</th><th>Ürün</th><th>İşlem</th><th>Adet</th><th>İptal</th></tr></thead>
@@ -351,20 +351,11 @@
     function switchTab(tab) { ['materials', 'products', 'locations', 'finance', 'custom', 'queue'].forEach(t => { document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; document.getElementById('tab-btn-' + t).className = 'nav-btn' + (t === tab ? ' active' : ''); }); refreshUI(); }
     function toggleProductView() { productViewMode = productViewMode === 'card' ? 'list' : 'card'; refreshUI(); }
 
-    // HAMMADDE İŞLEMLERİ & HIZLI ALIM (YENİ)
+    // HAMMADDE İŞLEMLERİ
     function createNewMaterial() { const n = document.getElementById('new-mat-name').value; const unit = document.getElementById('new-mat-unit').value; const color = document.getElementById('new-mat-color').value; const limit = parseInt(document.getElementById('new-mat-limit').value) || 0; if(n) { db.materials.push({ id: 'MAT-'+Date.now(), name: n, unit: unit, color: color, alertLimit: limit }); saveDB(); document.getElementById('new-mat-name').value = ''; document.getElementById('new-mat-limit').value = ''; document.getElementById('new-mat-color').selectedIndex = 0; document.getElementById('new-mat-color-preview').style.backgroundColor = siteColors[0].rgb; refreshUI(); } }
     function editMaterial(id) { const mat = db.materials.find(m => m.id === id); if(!mat) return; document.getElementById('edit-mat-id').value = id; document.getElementById('edit-mat-name').value = mat.name; document.getElementById('edit-mat-unit').value = mat.unit || 'gr'; document.getElementById('edit-mat-color').value = mat.color || 'transparent'; document.getElementById('edit-mat-color-preview').style.backgroundColor = mat.color || 'transparent'; document.getElementById('edit-mat-limit').value = mat.alertLimit || 0; document.getElementById('editMatModal').style.display = 'flex'; }
     function saveEditedMaterial() { const id = document.getElementById('edit-mat-id').value; const name = document.getElementById('edit-mat-name').value; const unit = document.getElementById('edit-mat-unit').value; const color = document.getElementById('edit-mat-color').value; const limit = parseInt(document.getElementById('edit-mat-limit').value) || 0; if(!name) return; const mat = db.materials.find(m => m.id === id); if(mat) { mat.name = name.trim(); mat.unit = unit; mat.color = color; mat.alertLimit = limit; saveDB(); refreshUI(); document.getElementById('editMatModal').style.display = 'none'; } }
-    
-    function quickAddStock(matId) {
-        const q = parseFloat(document.getElementById(`q-mat-qty-${matId}`).value);
-        const p = parseFloat(document.getElementById(`q-mat-price-${matId}`).value) || 0;
-        if(!q || q <= 0) return alert("Lütfen alınacak miktarı girin!");
-        const d = new Date().toISOString().slice(0,10);
-        db.stockLogs.push({id: 'LOG-'+Date.now(), matId: matId, date: d, type: 'IN', qty: q, price: p});
-        saveDB(); refreshUI();
-    }
-    
+    function quickAddStock(matId) { const q = parseFloat(document.getElementById(`q-mat-qty-${matId}`).value); const p = parseFloat(document.getElementById(`q-mat-price-${matId}`).value) || 0; if(!q || q <= 0) return alert("Lütfen alınacak miktarı girin!"); const d = new Date().toISOString().slice(0,10); db.stockLogs.push({id: 'LOG-'+Date.now(), matId: matId, date: d, type: 'IN', qty: q, price: p}); saveDB(); refreshUI(); }
     function addStockLog() { const m = document.getElementById('log-mat-select').value; const q = parseFloat(document.getElementById('log-qty').value); const p = parseFloat(document.getElementById('log-price').value); const d = document.getElementById('log-date').value; if(m && q && d) { db.stockLogs.push({id: 'LOG-'+Date.now(), matId: m, date: d, type: 'IN', qty: q, price: p}); saveDB(); document.getElementById('log-qty').value = ''; document.getElementById('log-price').value = ''; refreshUI(); } }
     function openMaterialHistory(matId) { currentHistoryMatId = matId; const mat = db.materials.find(m => m.id === matId); if(!mat) return; document.getElementById('mat-history-title').innerText = `📦 ${mat.name} - Hareket Geçmişi`; const tbody = document.getElementById('mat-history-list'); tbody.innerHTML = ''; const logs = db.stockLogs.filter(l => l.matId === matId).slice().reverse(); if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan=\"5\" style=\"text-align:center;\">Bu hammaddenin henüz hiçbir alım/kullanım kaydı yok.</td></tr>'; } else { logs.forEach(l => { const typeLabel = l.type === 'IN' ? '<span style=\"color:var(--success);font-weight:bold;\">🟢 Yeni Alım</span>' : '<span style=\"color:var(--danger);font-weight:bold;\">🔴 Çıkış</span>'; const priceLabel = l.type === 'IN' ? `${(l.price||0).toFixed(2)} ₺` : '-'; tbody.innerHTML += `<tr><td>${l.date}</td><td>${typeLabel}</td><td><b>${l.qty} ${mat.unit||'gr'}</b></td><td>${priceLabel}</td><td><button class=\"btn-danger\" style=\"padding:4px 8px; min-height:0;\" onclick=\"deleteStockLog('${l.id}')\">🗑️ Sil</button></td></tr>`; }); } document.getElementById('materialHistoryModal').style.display = 'flex'; }
     function deleteStockLog(logId) { if(confirm("Bu hareketi silmek istediğinize emin misiniz?")) { db.stockLogs = db.stockLogs.filter(l => l.id !== logId); saveDB(); if(currentHistoryMatId) openMaterialHistory(currentHistoryMatId); refreshUI(); } }
@@ -410,11 +401,12 @@
     function cloneProduct(id) { const pr = db.products.find(x => x.id === id); if(!pr) return; editProduct(id); editingProductId = null; document.getElementById('prod-name').value = pr.name + " (Kopya)"; document.getElementById('prod-code').value = getNextProductCode(); }
     function deleteProduct(id) { if(confirm("Ürünü silmek istediğinize emin misiniz?")) { db.products = db.products.filter(x => x.id !== id); saveDB(); refreshUI(); } }
 
-    // HIZLI ÜRETİM (YENİ)
-    function quickProduce(prodId) {
-        const qInput = document.getElementById(`q-prod-qty-${prodId}`);
+    // YENİ HIZLI ÜRETİM (LİSTE VE KART İÇİN)
+    function quickProduce(prodId, isList = false) {
+        const inputId = isList ? `q-prod-qty-list-${prodId}` : `q-prod-qty-${prodId}`;
+        const qInput = document.getElementById(inputId);
         const q = parseInt(qInput.value);
-        if(isNaN(q) || q <= 0) return alert("Lütfen üretilen adeti girin!");
+        if(isNaN(q) || q <= 0) return alert("Lütfen üretilecek adeti girin!");
         
         const pr = db.products.find(x => x.id === prodId); 
         let relatedLogIds = []; 
@@ -425,7 +417,8 @@
         }); 
         pr.finishedStock = (pr.finishedStock || 0) + q; 
         db.productionLogs.push({ id: 'PRODLOG-' + Date.now(), prodId: prodId, prodName: pr.name, qty: q, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), relatedStockLogs: relatedLogIds });
-        saveDB(); refreshUI(); 
+        saveDB(); 
+        refreshUI(); 
     }
 
     function openProductionHistory() {
@@ -488,7 +481,7 @@
         saveDB(); refreshUI();
     }
 
-    // HIZLI GÖNDERİM (YENİ)
+    // HIZLI GÖNDERİM
     function quickLocationSend(locId, prodId) {
         const q = parseInt(document.getElementById(`q-send-${locId}-${prodId}`).value);
         if(isNaN(q) || q <= 0) return alert("Lütfen gönderilecek adeti girin!");
@@ -501,7 +494,7 @@
         saveDB(); refreshUI();
     }
 
-    // BAYİ İŞLEM GEÇMİŞİ VE İPTAL (YENİ)
+    // BAYİ İŞLEM GEÇMİŞİ VE İPTAL
     function openLocationHistory() {
         const tbody = document.getElementById('loc-history-list'); tbody.innerHTML = '';
         const logs = db.locationLogs.slice().sort((a,b) => b.timestamp - a.timestamp); 
@@ -527,7 +520,7 @@
         if(pr) {
             if(log.type === 'SEND') pr.finishedStock += log.qty; // Gönderilen malı merkeze geri al
             else if (log.type === 'RETURN') pr.finishedStock = Math.max(0, pr.finishedStock - log.qty); // İade alınan malı merkezden geri düş
-            // 'SALE' ise satılan malın silinmesi bayinin dinamik raf stoğunu otomatik artıracak ve net cirodan düşecektir. Ek işlem gerekmez.
+            // 'SALE' iptali sadece istatistikten siler, başka bir ekleme çıkarma yapmaz.
         }
         db.locationLogs = db.locationLogs.filter(x => x.id !== logId);
         saveDB(); openLocationHistory(); refreshUI();
@@ -604,24 +597,25 @@
             let imageHTML = p.image ? `<img src=\"${p.image}\" class=\"product-image-thumbnail\">` : '';
             let codeHTML = p.code ? `<div class=\"product-code-badge\">${p.code}</div>` : '';
             let igHTML = p.igLink ? `<a href=\"${p.igLink}\" target=\"_blank\" class=\"btn-outline\" style=\"flex:1; text-align:center; padding:10px; text-decoration:none; display:block;\">📱 IG Gör</a>` : '';
-            
             let starIcon = p.isFavorite ? '⭐' : '☆';
             let favToggleHTML = `<span style=\"cursor:pointer; font-size:20px; color:${p.isFavorite ? '#f1c40f' : '#bdc3c7'}; user-select:none; margin-right:6px;\" onclick=\"toggleFavorite('${p.id}')\" title=\"Favorilere Ekle/Çıkar\">${starIcon}</span>`;
             
-            // YENİ HIZLI ÜRETİM ARAYÜZÜ (Kart ve Liste İçin)
+            // YEPYENİ HIZLI ÜRETİM TASARIMI (Kart İçin)
             let quickProduceHTMLCard = `
-            <div style=\"flex: 1 1 100%; display:flex; gap:4px; margin-bottom:4px;\">
-                <input type=\"number\" id=\"q-prod-qty-${p.id}\" placeholder=\"Adet\" min=\"1\" style=\"flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; text-align:center;\">
-                <button class=\"btn-success\" style=\"flex:2; padding:6px;\" onclick=\"quickProduce('${p.id}')\">⚙️ Hızlı Üret</button>
+            <div style=\"background:#f8f9fa; padding:8px; border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; border:1px solid #e1e8ed;\">
+                <span style=\"font-size:12px; font-weight:bold; color:var(--secondary); margin-right:5px;\">Hızlı Üret:</span>
+                <input type=\"number\" id=\"q-prod-qty-${p.id}\" placeholder=\"Adet\" min=\"1\" style=\"width:60px; padding:6px; text-align:center; border:1px solid #bdc3c7; border-radius:4px; font-weight:bold;\">
+                <button class=\"btn-success\" style=\"padding:6px 12px; font-size:12px; margin-left:5px; box-shadow:0 2px 4px rgba(39,174,96,0.2);\" onclick=\"quickProduce('${p.id}', false)\">⚙️ Ekle</button>
             </div>`;
 
+            // LİSTE İÇİN (Hata Düzeltildi, isList = true parametresi eklendi)
             let quickProduceHTMLList = `
-            <div style=\"display:flex; gap:2px;\">
+            <div style=\"display:flex; gap:2px; align-items:center;\">
                 <input type=\"number\" id=\"q-prod-qty-list-${p.id}\" placeholder=\"Adet\" min=\"1\" style=\"width:45px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px; text-align:center;\">
-                <button class=\"btn-success\" style=\"padding:4px 6px; font-size:11px;\" onclick=\"document.getElementById('q-prod-qty-${p.id}').value = document.getElementById('q-prod-qty-list-${p.id}').value; quickProduce('${p.id}')\">⚙️ Üret</button>
+                <button class=\"btn-success\" style=\"padding:4px 6px; font-size:11px;\" onclick=\"quickProduce('${p.id}', true)\">⚙️</button>
             </div>`;
 
-            cardsHTML += `<div class=\"product-card\"><div>${imageHTML}<div class=\"product-card-header\"><div class=\"product-card-title\">${favToggleHTML} ${p.name} ${codeHTML}</div><div style=\"color:var(--success); font-weight:bold; font-size:14px; text-align:right;\">Stok: <br><span style=\"font-size:18px;\">${p.finishedStock || 0}</span></div></div><div class=\"product-recipe-list\"><strong style=\"display:block; margin-bottom:8px; color:var(--primary);\">Kullanılan Malzemeler:</strong>${recipeHTMLCard}</div><div class=\"product-stats\"><div>Maliyet<br><b style=\"color:var(--danger)\">${tc.toFixed(2)} ₺</b></div><div>Satış<br><b style=\"color:var(--primary)\">${(p.sellPrice || 0).toFixed(2)} ₺</b></div><div>Net Kâr<br><b style=\"color:${profit >= 0 ? 'var(--success)' : 'var(--danger)'}\">${profit.toFixed(2)} ₺</b></div></div></div><div class=\"product-actions\">${quickProduceHTMLCard}${igHTML}<button style=\"flex: 1;\" class=\"btn-purple\" onclick=\"cloneProduct('${p.id}')\">📑 Kopya</button><button style=\"flex: 1;\" class=\"btn-warning\" onclick=\"editProduct('${p.id}')\">✏️ Düz.</button><button style=\"flex: 1;\" class=\"btn-danger\" onclick=\"deleteProduct('${p.id}')\">🗑️ Sil</button></div></div>`;
+            cardsHTML += `<div class=\"product-card\"><div>${imageHTML}<div class=\"product-card-header\"><div class=\"product-card-title\">${favToggleHTML} ${p.name} ${codeHTML}</div><div style=\"color:var(--success); font-weight:bold; font-size:14px; text-align:right;\">Stok: <br><span style=\"font-size:18px;\">${p.finishedStock || 0}</span></div></div><div class=\"product-recipe-list\"><strong style=\"display:block; margin-bottom:8px; color:var(--primary);\">Kullanılan Malzemeler:</strong>${recipeHTMLCard}</div><div class=\"product-stats\"><div>Maliyet<br><b style=\"color:var(--danger)\">${tc.toFixed(2)} ₺</b></div><div>Satış<br><b style=\"color:var(--primary)\">${(p.sellPrice || 0).toFixed(2)} ₺</b></div><div>Net Kâr<br><b style=\"color:${profit >= 0 ? 'var(--success)' : 'var(--danger)'}\">${profit.toFixed(2)} ₺</b></div></div></div><div>${quickProduceHTMLCard}<div class=\"product-actions\">${igHTML}<button style=\"flex: 1;\" class=\"btn-purple\" onclick=\"cloneProduct('${p.id}')\">📑 Kopya</button><button style=\"flex: 1;\" class=\"btn-warning\" onclick=\"editProduct('${p.id}')\">✏️ Düz.</button><button style=\"flex: 1;\" class=\"btn-danger\" onclick=\"deleteProduct('${p.id}')\">🗑️ Sil</button></div></div></div>`;
             
             let listImgHTML = p.image ? `<img src=\"${p.image}\" style=\"width:40px; height:40px; object-fit:cover; border-radius:4px;\">` : 'Yok';
             let listIgHTML = p.igLink ? `<a href=\"${p.igLink}\" target=\"_blank\" title=\"Instagram\">📱</a>` : '';
@@ -652,31 +646,45 @@
         });
 
         const ls = document.getElementById('loc-select'); ls.innerHTML = '<option value=\"\">-Bayi-</option>'; const lc = document.getElementById('locations-container'); lc.innerHTML = '';
-        let b2bTotalRevenue = 0; let expectedLocRev = 0; 
+        
+        let b2bTotalRevenue = 0; 
         
         db.locations.forEach(loc => {
             ls.innerHTML += `<option value=\"${loc.id}\">${loc.name}</option>`; let stats = {}; 
+            
+            // FİNANSAL YENİ HESAPLAMA (TOPTAN PEŞİN)
             db.locationLogs.filter(log => log.locId === loc.id).forEach(log => {
                 const pr = db.products.find(p => p.id === log.prodId); const actP = log.price !== undefined ? log.price : (pr ? (pr.sellPrice || 0) : 0);
                 if(!stats[log.prodId]) stats[log.prodId] = { sent: 0, sentVal: 0, sold: 0, soldVal: 0, ret: 0 };
-                if(log.type === 'SEND') { stats[log.prodId].sent += log.qty; stats[log.prodId].sentVal += (log.qty * actP); }
-                if(log.type === 'SALE') { stats[log.prodId].sold += log.qty; stats[log.prodId].soldVal += (log.qty * actP); b2bTotalRevenue += (log.qty * actP); }
-                if(log.type === 'RETURN') { stats[log.prodId].ret += log.qty; }
+                
+                if(log.type === 'SEND') { 
+                    stats[log.prodId].sent += log.qty; 
+                    stats[log.prodId].sentVal += (log.qty * actP); 
+                    b2bTotalRevenue += (log.qty * actP); // GELİR GÖNDERİLİNCE YAZILIR
+                }
+                if(log.type === 'SALE') { 
+                    stats[log.prodId].sold += log.qty; 
+                    stats[log.prodId].soldVal += (log.qty * actP); 
+                    // GELİR YAZILMAZ! SADECE İSTATİSTİK
+                }
+                if(log.type === 'RETURN') { 
+                    stats[log.prodId].ret += log.qty; 
+                    b2bTotalRevenue -= (log.qty * actP); // İADE GELİRDEN DÜŞÜLÜR
+                }
             });
+
             let invHTML = `<div class=\"table-responsive\"><table><thead><tr><th>Ürün</th><th>Raflı</th><th>Satılan</th><th>Hızlı Sat / Gönder</th></tr></thead><tbody>`; let hs = false;
             Object.keys(stats).forEach(prodId => {
                 const pr = db.products.find(p => p.id === prodId);
                 if(pr) { 
-                    const st = stats[prodId]; const cur = st.sent - st.sold - st.ret; const avgSP = st.sent > 0 ? (st.sentVal / st.sent) : (pr.sellPrice || 0); expectedLocRev += (cur * avgSP); 
+                    const st = stats[prodId]; const cur = st.sent - st.sold - st.ret;
                     if(st.sent > 0) { 
                         hs=true; 
-                        
                         let quickOpsHTML = `
                         <div style=\"display:flex; flex-direction:column; gap:4px;\">
                             ${cur > 0 ? `<div style=\"display:flex; gap:4px;\"><input type=\"number\" id=\"q-sale-${loc.id}-${prodId}\" style=\"width:45px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px; text-align:center;\" placeholder=\"Adet\" min=\"1\" max=\"${cur}\"><button class=\"btn-success\" style=\"padding:4px 8px; min-height:0; font-size:11px;\" onclick=\"quickLocationSale('${loc.id}','${prodId}',${cur})\">💰 Sat</button></div>` : '<span style=\"font-size:11px; color:#e74c3c; font-weight:bold;\">Rafta Bitti</span>'}
                             <div style=\"display:flex; gap:4px;\"><input type=\"number\" id=\"q-send-${loc.id}-${prodId}\" style=\"width:45px; padding:4px; font-size:11px; border:1px solid #ccc; border-radius:4px; text-align:center;\" placeholder=\"Adet\" min=\"1\"><button class=\"btn-info\" style=\"padding:4px 8px; min-height:0; font-size:11px;\" onclick=\"quickLocationSend('${loc.id}','${prodId}')\">📦 Gönder</button></div>
                         </div>`;
-
                         invHTML += `<tr><td>${pr.name}</td><td><b>${cur}</b></td><td><b style=\"color:var(--success)\">${st.sold}</b></td><td>${quickOpsHTML}</td></tr>`; 
                     } 
                 }
@@ -692,13 +700,21 @@
 
         let totalCenterValue = 0; let totalPrintedCost = 0;
         db.products.forEach(p => {
-            let uCost = 0; p.recipe.forEach(i => { uCost += calculateMaterialStats(i.matId).avgCost * i.qty; }); let cStock = p.finishedStock || 0; totalCenterValue += (cStock * (p.sellPrice || 0));
-            let tLocStock = 0; db.locations.forEach(loc => { let sent=0, sold=0, ret=0; db.locationLogs.filter(log => log.locId === loc.id && log.prodId === p.id).forEach(log => { if(log.type === 'SEND') sent += log.qty; if(log.type === 'SALE') sold += log.qty; if(log.type === 'RETURN') ret += log.qty; }); tLocStock += (sent - sold - ret); });
-            totalPrintedCost += ((cStock + tLocStock) * uCost); 
+            let uCost = 0; p.recipe.forEach(i => { uCost += calculateMaterialStats(i.matId).avgCost * i.qty; }); 
+            let cStock = p.finishedStock || 0; 
+            
+            // FİNANSAL DEĞERLER SADECE MERKEZ DEPOYU (cStock) HESAPLAR
+            totalCenterValue += (cStock * (p.sellPrice || 0));
+            totalPrintedCost += (cStock * uCost); 
         });
 
-        document.getElementById('fin-raw-value').innerText = totalRawValue.toFixed(2) + " ₺"; document.getElementById('fin-prod-cost').innerText = totalPrintedCost.toFixed(2) + " ₺";
-        const expectedTotal = totalCenterValue + expectedLocRev; document.getElementById('fin-prod-value').innerText = expectedTotal.toFixed(2) + " ₺"; document.getElementById('fin-prod-profit').innerText = (expectedTotal - totalPrintedCost).toFixed(2) + " ₺";
+        document.getElementById('fin-raw-value').innerText = totalRawValue.toFixed(2) + " ₺"; 
+        document.getElementById('fin-prod-cost').innerText = totalPrintedCost.toFixed(2) + " ₺";
+        
+        // Bayideki (Zaten parası alınmış) mallar ciro beklentisine dahil edilmez!
+        const expectedTotal = totalCenterValue; 
+        document.getElementById('fin-prod-value').innerText = expectedTotal.toFixed(2) + " ₺"; 
+        document.getElementById('fin-prod-profit').innerText = (expectedTotal - totalPrintedCost).toFixed(2) + " ₺";
 
         const bestSellersBody = document.getElementById('analytics-best-sellers'); const deadStockBody = document.getElementById('analytics-dead-stock');
         bestSellersBody.innerHTML = ''; deadStockBody.innerHTML = '';
