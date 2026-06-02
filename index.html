@@ -13,6 +13,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,6 +35,7 @@
         button:active { transform: translateY(0); }
         .btn-success { background-color: var(--success); } .btn-warning { background-color: var(--warning); color: #fff; } .btn-danger { background-color: var(--danger); } .btn-purple { background-color: var(--purple); } .btn-info { background-color: #0984e3; }
         .btn-outline { background-color: transparent; border: 2px solid var(--accent); color: var(--accent); }
+        .btn-excel { background-color: #107c41; color: white; } /* Excel Yeşili */
         
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; } .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; } .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } .container{ padding: 10px; } }
@@ -81,7 +83,8 @@
         <h1 style="font-size:24px; margin:0; font-weight: 800;">Mete 3D İşletme Paneli</h1>
         <div class="header-buttons">
             <div id="sync-status" class="sync-status-indicator">⏳ Bağlanıyor...</div>
-            <button class="btn-success" onclick="exportData()">💾 Yedek Al</button>
+            <button class="btn-success" style="padding: 8px 12px; font-size: 13px;" onclick="exportData()">💾 Sistem Yedeği (JSON)</button>
+            <button class="btn-excel" style="padding: 8px 12px; font-size: 13px;" onclick="exportExcel()">📊 Excel Raporu</button>
         </div>
     </div>
 
@@ -294,12 +297,90 @@
     }).catch(() => { document.getElementById('sync-status').innerHTML = '🔴 Bağlantı Hatası'; });
 
     function saveDB() { const s = document.getElementById('sync-status'); s.innerHTML = '🔄 Kaydediliyor...'; s.classList.remove('connected'); dbRef.set(db).then(() => { s.innerHTML = '🟢 Kaydedildi'; s.classList.add('connected'); }).catch(() => { s.innerHTML = '🔴 Hata!'; }); }
-    function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); a.download = "Mete3D_Yedek_V57_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); a.remove(); }
+    
+    // --- MEVCUT: JSON YEDEK ALMA (Sistemi geri yüklemek için) ---
+    function exportData() { 
+        const a = document.createElement('a'); 
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); 
+        a.download = "Mete3D_SistemYedek_V58_" + new Date().toISOString().slice(0,10) + ".json"; 
+        document.body.appendChild(a); a.click(); a.remove(); 
+    }
+
+    // --- YENİ: EXCEL ÇIKTISI ALMA (İnsanların okuması için) (V58) ---
+    function exportExcel() {
+        if (typeof XLSX === 'undefined') return alert('Excel kütüphanesi yüklenemedi. Lütfen internet bağlantınızı kontrol edin.');
+
+        // 1. Ürünler Tablosunu Hazırla
+        const productsData = db.models.map(m => {
+            let produced = 0; let sold = 0;
+            db.productionLogs.filter(l => l.modelId === m.id).forEach(l => produced += l.qty);
+            db.locationLogs.filter(l => l.type === 'SALE' && l.items).forEach(l => {
+                l.items.filter(i => i.modelId === m.id).forEach(i => sold += i.qty);
+            });
+            return {
+                "Ürün Kodu": m.code || "-",
+                "Ürün Adı": m.name,
+                "Satış Fiyatı (₺)": m.sellPrice || 0,
+                "Harcanan Filament (gr)": m.filGr || 0,
+                "Toplam Üretilen": produced,
+                "Toplam Satılan": sold,
+                "Mevcut Stok": produced - sold
+            };
+        });
+
+        // 2. Üretim Geçmişi Tablosunu Hazırla
+        const productionData = db.productionLogs.map(l => {
+            const m = db.models.find(x => x.id === l.modelId);
+            return {
+                "Tarih / Saat": l.date,
+                "Ürün Adı": m ? m.name : "Silinmiş Ürün",
+                "Üretilen Adet": l.qty,
+                "Kullanılan Toplam Filament (gr)": l.gramsUsed,
+                "Hesaplanan Maliyet (₺)": parseFloat(l.costAssigned.toFixed(2))
+            };
+        });
+
+        // 3. Bayi Satışları Tablosunu Hazırla
+        const salesData = db.locationLogs.filter(l => l.type === 'SALE').map(l => {
+            const loc = db.locations.find(x => x.id === l.locId);
+            let detailStr = (l.items || []).map(i => {
+                const m = db.models.find(x => x.id === i.modelId);
+                return `${i.qty}x ${m ? m.name : 'Bilinmeyen'}`;
+            }).join(', ');
+
+            return {
+                "Tarih": l.date,
+                "Bayi Adı": loc ? loc.name : "Silinmiş Bayi",
+                "Satılan Toplam Ürün (Adet)": l.qty,
+                "Sipariş Detayı": detailStr,
+                "Kazanılan Tutar (₺)": l.price
+            };
+        });
+
+        // 4. Diğer Giderler Tablosunu Hazırla
+        const expensesData = (db.otherExpenses || []).map(e => ({
+            "Tarih": e.date,
+            "Gider Açıklaması": e.desc,
+            "Ödenen Tutar (₺)": e.amount
+        }));
+
+        // Excel Çalışma Kitabı (Workbook) Oluştur
+        const wb = XLSX.utils.book_new();
+        
+        // Verileri sayfalara (sheet) çevirip çalışma kitabına ekle
+        if (productsData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productsData), "Ürün Kataloğu");
+        if (productionData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productionData), "Üretim Geçmişi");
+        if (salesData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salesData), "Bayi Satışları");
+        if (expensesData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(expensesData), "Diğer Giderler");
+
+        // Dosyayı indir
+        XLSX.writeFile(wb, "Mete3D_Excel_Raporu_" + new Date().toISOString().slice(0,10) + ".xlsx");
+    }
+
     function switchTab(tab) { ['materials', 'products', 'locations', 'finance'].forEach(t => { document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; document.getElementById('tab-btn-' + t).className = 'nav-btn' + (t === tab ? ' active' : ''); }); refreshUI(); }
     function filterProducts() { const input = document.getElementById('search-product').value.toLowerCase(); document.querySelectorAll('.prod-card-item').forEach(card => { card.style.display = card.innerText.toLowerCase().includes(input) ? '' : 'none'; }); }
     function filterDealers() { const input = document.getElementById('search-dealer').value.toLowerCase(); document.querySelectorAll('.dealer-card-item').forEach(card => { card.style.display = card.innerText.toLowerCase().includes(input) ? '' : 'none'; }); }
 
-    // YENİ: Üretim Geçmişi Arama Fonksiyonu (V57)
     function filterProdHistory() {
         const input = document.getElementById('search-prod-history').value.toLowerCase();
         const rows = document.querySelectorAll('#prod-history-list tr');
@@ -406,13 +487,11 @@
     function deleteAccessory(id) { if(db.models.some(m => m.recipe && m.recipe.some(r => r.accId === id))) return alert("Reçetede kullanılıyor."); if(confirm("Sil?")) { db.accessories = db.accessories.filter(a => a.id !== id); saveDB(); refreshUI(); } }
     function addAccStock(accId) { const q = parseInt(document.getElementById(`acc-in-qty-${accId}`).value); const p = parseFloat(document.getElementById(`acc-in-price-${accId}`).value) || 0; if(isNaN(q) || q <= 0) return; db.accessoryLogs.push({ id: 'ALOG-'+Date.now(), accId: accId, date: new Date().toISOString().slice(0,10), type: 'IN', qty: q, price: p }); saveDB(); refreshUI(); }
     
-    // YENİ: SADELEŞTİRİLMİŞ AKSESUAR GEÇMİŞİ (Sadece 'IN' işlemleri) (V57)
     let currentAccHistoryId = null; 
     function openAccHistory(accId) { 
         currentAccHistoryId = accId; const acc = db.accessories.find(a => a.id === accId); if(!acc) return; 
         document.getElementById('acc-history-title').innerText = `🔗 ${acc.name} - Alım Geçmişi`; 
         const tbody = document.getElementById('acc-history-list'); tbody.innerHTML = ''; 
-        // Burada sadece 'IN' filtrelemesi yapıyoruz
         const logs = db.accessoryLogs.filter(l => l.accId === accId && l.type === 'IN').slice().reverse(); 
         if(logs.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Kayıt yok</td></tr>'; 
         else { 
@@ -453,7 +532,7 @@
     function confirmProduction() { const mId = document.getElementById('modal-prod-id').value; const q = parseInt(document.getElementById('modal-prod-qty').value); if(isNaN(q) || q <= 0) return alert("Adet girin!"); const m = db.models.find(x => x.id === mId); const reqFil = q * m.filGr; const fStats = getGlobalFilamentStats(); if(reqFil > fStats.currentStock) return alert(`Depoda yeterli filament yok`); if(m.recipe && m.recipe.length > 0) { for(let r of m.recipe) { const a = db.accessories.find(x=>x.id===r.accId); const reqAcc = q * r.qty; const curAcc = getAccStock(r.accId); if(reqAcc > curAcc) return alert(`Yeterli aksesuar yok`); } } let totalCostAssigned = reqFil * fStats.avgCostPerGram; let generatedAccLogIds = []; if(m.recipe && m.recipe.length > 0) { m.recipe.forEach(r => { let aIn=0, aPaid=0; db.accessoryLogs.filter(l=>l.accId===r.accId && l.type==='IN').forEach(l=>{aIn+=l.qty; aPaid+=l.price;}); let aAvg = aIn>0 ? (aPaid/aIn) : 0; totalCostAssigned += (q * r.qty * aAvg); const aLogId = 'ALOG-'+Date.now()+Math.random().toString(36).substr(2,5); db.accessoryLogs.push({ id: aLogId, accId: r.accId, date: new Date().toISOString().slice(0,10), type: 'OUT', qty: q * r.qty, price: 0 }); generatedAccLogIds.push(aLogId); }); } db.productionLogs.push({ id: 'PRODLOG-'+Date.now(), modelId: mId, qty: q, gramsUsed: reqFil, relatedAccLogIds: generatedAccLogIds, costAssigned: totalCostAssigned, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) }); saveDB(); document.getElementById('produceModal').style.display = 'none'; refreshUI(); }
     
     function openProductionHistory() { 
-        document.getElementById('search-prod-history').value = ''; // Aramayı sıfırla
+        document.getElementById('search-prod-history').value = '';
         const tbody = document.getElementById('prod-history-list'); tbody.innerHTML = ''; 
         const logs = db.productionLogs.slice().reverse(); 
         if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kayıt yok</td></tr>'; } 
