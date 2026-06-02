@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D İş Takip</title>
+    <title>Mete3D İş Takip</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☁️</text></svg>">
     <link rel="apple-touch-icon" href="logo.jpg">
@@ -15,7 +15,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #3498db; --bg: #f4f7f6; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --purple: #8e44ad; --info: #00cec9; }
+        *, *::before, *::after { box-sizing: border-box; }
+
+        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #3498db; --bg: #f4f7f6; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --purple: #8e44ad; --info: #00cec9; --card-border: #95a5a6; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; -webkit-font-smoothing: antialiased; }
         .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
         h1, h2, h3, h4 { color: var(--primary); margin-top: 0; }
@@ -23,7 +25,7 @@
         .header-buttons { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         
         .nav-tabs { display: flex; gap: 8px; margin-top: 15px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; flex-wrap: wrap; justify-content: center; }
-        .nav-btn { background: #f8f9fa; border: 1px solid #e1e8ed; font-size: 15px; font-weight: 600; color: #7f8c8d; cursor: pointer; padding: 12px 16px; border-radius: 8px; transition: 0.2s; flex: 1 1 auto; text-align: center; }
+        .nav-btn { background: #f8f9fa; border: 2px solid #e1e8ed; font-size: 15px; font-weight: 600; color: #7f8c8d; cursor: pointer; padding: 12px 16px; border-radius: 8px; transition: 0.2s; flex: 1 1 auto; text-align: center; }
         .nav-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3); }
         @media (max-width: 768px) { .nav-tabs { gap: 6px; } .nav-btn { flex: 1 1 calc(50% - 10px); font-size: 13px; padding: 12px 5px; } }
 
@@ -31,659 +33,614 @@
         button:hover { opacity: 0.85; transform: translateY(-1px); }
         button:active { transform: translateY(0); }
         .btn-success { background-color: var(--success); } .btn-warning { background-color: var(--warning); color: #fff; } .btn-danger { background-color: var(--danger); } .btn-purple { background-color: var(--purple); } .btn-info { background-color: #0984e3; }
-        .btn-outline { background-color: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-outline { background-color: transparent; border: 2px solid var(--accent); color: var(--accent); }
         
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; } .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; } .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } .container{ padding: 10px; } }
         
-        .card { background: #fff; border: 1px solid #e1e8ed; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .form-group { margin-bottom: 12px; } .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: var(--secondary); }
-        .form-group input, .form-group select { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccd1d9; border-radius: 8px; font-size: 16px; background-color: #fafbfc; -webkit-appearance: none; }
+        .card { background: #fff; border: 3px solid var(--card-border); padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 15px; width: 100%; } .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: var(--secondary); }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #ccd1d9; border-radius: 8px; font-size: 16px; background-color: #fafbfc; -webkit-appearance: none; }
         .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); background-color: white; }
         
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #eee; margin-bottom:15px; width: 100%; }
+        .search-container { position: relative; width: 100%; margin-bottom: 20px; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #7f8c8d; }
+        .search-input { width: 100%; padding: 15px 15px 15px 45px !important; border: 3px solid var(--accent) !important; border-radius: 10px !important; font-size: 16px !important; background-color: #fff !important; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.1); transition: 0.3s; }
+        
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 2px solid #eee; margin-bottom:15px; width: 100%; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; } th, td { border-bottom: 1px solid #eee; padding: 12px 10px; text-align: left; } th { background-color: #f8f9fa; color: var(--secondary); font-weight: 600; white-space: nowrap; }
         
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; } .badge-danger { background: #fadbd8; color: #c0392b; } .badge-warning { background: #fcf3cf; color: #d68910; } .badge-info { background: #d6eaf8; color: #2980b9; }
-        .stat-card { padding: 20px; border-radius: 10px; color: white; display: flex; flex-direction: column; justify-content: center; } .stat-card .title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 5px; font-weight: bold; } .stat-card .value { font-size: 26px; font-weight: bold; }
-        .red { background: linear-gradient(135deg, #e74c3c, #c0392b); } .green { background: linear-gradient(135deg, #2ecc71, #27ae60); } .blue { background: linear-gradient(135deg, #3498db, #2980b9); } .dark { background: linear-gradient(135deg, #34495e, #2c3e50); }
+        .stat-card { padding: 20px; border-radius: 10px; color: white; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid rgba(255,255,255,0.2); } .stat-card .title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 5px; font-weight: bold; } .stat-card .value { font-size: 28px; font-weight: bold; }
+        .red { background: linear-gradient(135deg, #e74c3c, #c0392b); } .green { background: linear-gradient(135deg, #2ecc71, #27ae60); } .blue { background: linear-gradient(135deg, #3498db, #2980b9); } .dark { background: linear-gradient(135deg, #34495e, #2c3e50); } .gold { background: linear-gradient(135deg, #f1c40f, #f39c12); color:#fff; }
         
-        .sync-status-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; padding: 8px 12px; border-radius: 8px; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; transition: 0.3s; }
+        .sync-status-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; padding: 8px 12px; border-radius: 8px; background: #fff3cd; border: 2px solid #ffeeba; color: #856404; transition: 0.3s; }
         .sync-status-indicator.connected { background: #d4edda; border-color: #c3e6cb; color: #155724; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; padding: 10px; box-sizing: border-box; } .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; } .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; } .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d; padding: 0; min-height: auto; }
-        .color-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #bbb; margin-right: 6px; vertical-align: middle; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; padding: 10px; } .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; border: 3px solid var(--primary); } .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; } .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d; padding: 0; min-height: auto; }
         
-        .recipe-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px dashed #ccc; } .recipe-row .form-group { margin-bottom: 0; flex: 1; }
-        .accordion-content { display: none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        .accordion-content { display: none; margin-top: 10px; border-top: 2px solid #eee; padding-top: 10px; }
 
-        /* TASARIM KARTLARI */
-        .mat-card { background: #fff; border-radius: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee; }
-        .mat-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; color: var(--primary); font-size: 14px; }
-        .mat-card-stock { font-size: 22px; font-weight: bold; margin-bottom: 15px; }
-        .mat-card-actions { display: flex; gap: 6px; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; }
+        .prod-card { background: #fff; border-radius: 10px; padding: 15px; border: 3px solid var(--card-border); box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: 0.2s; }
+        .prod-title-area { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        .prod-title { font-size: 18px; font-weight: bold; color: var(--primary); margin-bottom: 4px; display:flex; align-items:center; justify-content: space-between; }
+        .prod-code-badge { background: #ecf0f1; color: var(--secondary); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-family: monospace; display: inline-block; margin-right: 5px; border: 1px solid #bdc3c7; }
+        .dealer-card { background: #fff; border-radius: 10px; padding: 15px; border: 3px solid var(--card-border); box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: 0.2s; }
         
-        .prod-card { background: #fff; border-radius: 10px; padding: 15px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
-        .prod-title-area { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
-        .prod-title { font-size: 16px; font-weight: bold; color: var(--primary); margin-bottom: 4px; display:flex; align-items:center; }
-        .prod-code-badge { background: #ecf0f1; color: var(--secondary); padding: 3px 6px; border-radius: 4px; font-size: 10px; font-family: monospace; display: inline-block; margin-right: 5px; }
-        .prod-recipe-dots { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background:#f9f9f9; padding:8px; border-radius:6px; font-size:11px; color:#555; align-items:center;}
-        .prod-stats-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 15px; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; }
-        .prod-produce-box { background: #fdfdfd; padding: 10px; border-radius: 8px; border: 1px solid #d4edda; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .acc-card { background: #fff; border-radius: 10px; padding: 15px; border: 3px solid var(--purple); box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+
+        .pos-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 768px) { .pos-grid { grid-template-columns: 1.2fr 1fr; height: calc(90vh - 80px); } .pos-section { overflow-y: auto; padding-right:10px; } }
+        
+        .recipe-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; background: #f9f9f9; padding: 10px; border-radius: 8px; border: 2px dashed #ccc; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-actions">
-        <h1 style="font-size:22px; margin:0;">Mete 3D İşletme Paneli</h1>
+        <h1 style="font-size:24px; margin:0; font-weight: 800;">Mete 3D İşletme Paneli</h1>
         <div class="header-buttons">
             <div id="sync-status" class="sync-status-indicator">⏳ Bağlanıyor...</div>
-            <button class="btn-success" onclick="exportData()" title="Bilgisayarına yedek indirir">💾 Yedek Al</button>
+            <button class="btn-success" onclick="exportData()">💾 Yedek Al</button>
         </div>
     </div>
 
     <div class="nav-tabs">
-        <button class="nav-btn active" id="tab-btn-materials" onclick="switchTab('materials')">1. Hammadde</button>
-        <button class="nav-btn" id="tab-btn-products" onclick="switchTab('products')">2. 📦 Ürünler ve Stok</button>
+        <button class="nav-btn active" id="tab-btn-materials" onclick="switchTab('materials')">1. Hammadde & Aksesuar</button>
+        <button class="nav-btn" id="tab-btn-products" onclick="switchTab('products')">2. 📦 Ürünler ve Üretim</button>
         <button class="nav-btn" id="tab-btn-locations" onclick="switchTab('locations')">3. Bayiler (Satış)</button>
         <button class="nav-btn" id="tab-btn-finance" onclick="switchTab('finance')" style="color:var(--purple);">📊 4. Finans</button>
     </div>
 
     <div id="tab-materials">
-        <div class="grid-2" style="margin-bottom: 20px;">
-            <div class="stat-card blue" style="padding: 15px;">
-                <div class="title">Depodaki Güncel Filament (Gram)</div>
-                <div class="value" id="mat-total-current">0.00 gr</div>
-            </div>
-            <div class="stat-card red" style="padding: 15px;">
-                <div class="title">Üretimde Harcanan Toplam Filament</div>
-                <div class="value" id="mat-total-used">0.00 gr</div>
-            </div>
-        </div>
-
-        <div class="grid-3">
-            <div class="card">
-                <h3 style="margin-bottom: 10px;">Yeni Hammadde Tanımla</h3>
-                <div class="form-group"><label>Adı (Örn: PLA Kırmızı)</label><input type="text" id="new-mat-name"></div>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Renk</label>
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <span id="new-mat-color-preview" class="color-dot" style="margin:0; width:16px; height:16px; min-width:16px;"></span>
-                            <select id="new-mat-color" style="flex:1;" onchange="document.getElementById('new-mat-color-preview').style.backgroundColor=this.value"></select>
-                        </div>
-                    </div>
-                    <div class="form-group"><label>Birim</label><select id="new-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div>
-                    <div class="form-group"><label>Uyarı Limiti</label><input type="text" inputmode="decimal" class="num-input" id="new-mat-limit" placeholder="Örn: 500"></div>
+        <div class="card" style="background:#f8f9fa;"><h2 style="margin-top:0;">🧵 Filament Havuzu</h2><div class="grid-2"><div class="stat-card blue" style="padding: 20px;"><div class="title">Kalan Filament</div><div class="value" id="global-fil-current">0 gr</div></div><div class="stat-card dark" style="padding: 20px;"><div class="title">Ortalama Maliyet</div><div class="value" id="global-fil-avg-cost">0.00 ₺</div></div></div></div>
+        <div class="grid-2">
+            <div class="card" style="border-top: 8px solid var(--success); margin-bottom:15px;">
+                <h3 style="margin-top:0; color:var(--success);">📥 Yeni Filament Alımı</h3>
+                <div class="grid-2"><div class="form-group"><label>Toplam Gram</label><input type="text" inputmode="decimal" class="num-input" id="buy-fil-qty"></div><div class="form-group"><label>Ödenen (₺)</label><input type="text" inputmode="decimal" class="num-input" id="buy-fil-price"></div></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-success" onclick="addGlobalFilament()" style="flex:2;">✅ Depoya Ekle</button>
+                    <button class="btn-outline" style="flex:1;" onclick="openFilHistory()">🕒 Geçmiş</button>
                 </div>
-                <button onclick="createNewMaterial()" style="width:100%">Kataloğa Ekle</button>
             </div>
-            <div class="card" style="border-top: 4px solid var(--success);">
-                <h3 style="margin-bottom: 10px;">Toplu Stok Alımı Yap</h3>
-                <div class="form-group"><select id="log-mat-select"></select></div>
-                <div class="grid-2"><div class="form-group"><input type="text" inputmode="decimal" class="num-input" id="log-qty" placeholder="Miktar"></div><div class="form-group"><input type="text" inputmode="decimal" class="num-input" id="log-price" placeholder="Toplam Tutar (₺)"></div></div>
-                <div class="form-group"><input type="date" id="log-date"></div>
-                <button class="btn-success" onclick="addStockLog()" style="width:100%">Stoka İşle</button>
-            </div>
-            <div class="card" style="border-top: 4px solid var(--danger); background-color: #fdf2e9;">
-                <h3 style="color:var(--danger); margin-bottom:5px;">🗑️ Genel Fire Bildir</h3>
-                <div class="form-group"><label>Toplam Atık (Gram)</label><input type="text" inputmode="decimal" class="num-input" id="waste-qty" placeholder="Örn: 800"></div>
-                <div class="form-group"><label>Açıklama</label><input type="text" id="waste-desc" placeholder="Örn: Nisan Ayı Fireleri"></div>
-                <div style="display:flex; gap:10px;"><button class="btn-danger" onclick="addGlobalWasteLog()" style="flex:2;">İşle</button><button class="btn-outline" onclick="openWasteHistory()" style="flex:1;">Geçmiş</button></div>
-            </div>
+            <div class="card" style="border-top: 8px solid var(--danger); background-color: #fdf2e9; margin-bottom:15px;"><h3 style="margin-top:0; color:var(--danger);">🗑️ Fire / Çöp</h3><div class="grid-2"><div class="form-group"><label>Çöpe Giden (Gr)</label><input type="text" inputmode="decimal" class="num-input" id="waste-qty"></div><div class="form-group"><label>Açıklama</label><input type="text" id="waste-desc"></div></div><div style="display:flex; gap:10px;"><button class="btn-danger" onclick="addGlobalWaste()" style="flex:2;">Çöpe At</button><button class="btn-outline" onclick="openWasteHistory()" style="flex:1;">Geçmiş</button></div></div>
         </div>
         
-        <h3 style="color:var(--primary); margin-top:20px; border-bottom: 2px solid #eee; padding-bottom:10px;">Hammadde Deposu (Kutu Görünümü)</h3>
-        <div id="inventory-list" class="grid-4" style="margin-bottom: 20px;"></div>
+        <div style="background: #fdfbf7; padding: 15px; border-radius: 10px; border: 2px solid #e1e8ed;">
+            <h2 style="margin-top:0; color:var(--purple); border-bottom: 2px solid #ccd1d9; padding-bottom: 10px;">🔗 Aksesuar Deposu</h2>
+            <div class="card" style="border-top: 6px solid var(--purple);"><h3 style="margin-top:0;">Yeni Aksesuar Tanımla</h3><div style="display:flex; gap:10px; align-items:flex-end;"><div class="form-group" style="flex:1; margin-bottom:0;"><input type="text" id="new-acc-name" placeholder="Aksesuar adını yazın..."></div><button class="btn-purple" onclick="createAccessory()">➕ Ekle</button></div></div>
+            <div id="accessory-list-container" class="grid-3"></div>
+        </div>
     </div>
 
     <div id="tab-products" style="display: none;">
-        
         <div class="grid-3" style="margin-bottom: 20px;">
-            <div class="stat-card dark" style="padding: 15px;">
-                <div class="title">Bugüne Kadar Üretilen (Anahtarlık)</div>
-                <div class="value" id="stock-total-produced">0 Adet</div>
-            </div>
-            <div class="stat-card blue" style="padding: 15px;">
-                <div class="title">Bayilere Çıkışı Yapılan (Satılan)</div>
-                <div class="value" id="stock-total-sold">0 Adet</div>
-            </div>
-            <div class="stat-card green" style="padding: 15px; box-shadow: 0 4px 15px rgba(39,174,96,0.3);">
-                <div class="title">GÜNCEL DEPO STOĞU</div>
-                <div class="value" id="stock-current">0 Adet</div>
-            </div>
+            <div class="stat-card dark" style="padding: 15px;"><div class="title">Bugüne Kadar Üretilen</div><div class="value" id="stock-total-produced">0 Adet</div></div>
+            <div class="stat-card blue" style="padding: 15px;"><div class="title">Bayilere Çıkışı Yapılan</div><div class="value" id="stock-total-sold">0 Adet</div></div>
+            <div class="stat-card green" style="padding: 15px; box-shadow: 0 4px 15px rgba(39,174,96,0.3);"><div class="title">GÜNCEL ÜRÜN STOĞU</div><div class="value" id="stock-current">0 Adet</div></div>
         </div>
 
-        <div class="card" id="recipe-builder-card" style="border-left: 4px solid var(--accent);">
-            <h3 id="recipe-form-title" style="margin-top:0;">Yeni Ürün / Reçete Oluştur</h3>
+        <div class="card" style="border-left: 8px solid var(--accent);">
+            <h2 style="margin-top:0;" id="recipe-form-title">Yeni Ürün / Reçete Ekle</h2>
+            <input type="hidden" id="edit-model-id">
             <div class="grid-3">
-                <div class="form-group"><label>Ürün Adı *</label><input type="text" id="prod-name"></div>
+                <div class="form-group"><label>Ürün Adı *</label><input type="text" id="prod-name" placeholder="Örn: Logo Anahtarlık"></div>
                 <div class="form-group"><label>Ürün Kodu *</label><input type="text" id="prod-code" placeholder="Oto: M3D-00001"></div>
-                <div class="form-group"><label>Satış Fiyatı (Opsiyonel Perakende)</label><input type="text" inputmode="decimal" class="num-input" id="prod-price"></div>
+                <div class="form-group"><label>Satış Fiyatı (₺)</label><input type="text" inputmode="decimal" class="num-input" id="prod-price" placeholder="Örn: 25.50"></div>
             </div>
-            
-            <div id="recipe-container" style="margin-top:5px;">
-                <label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e1e8ed;">
+                <div class="form-group" style="margin-bottom:0;"><label style="color:var(--primary); font-size:15px;">🧵 1 Adet İçin Harcanan Filament (Gram) *</label><input type="text" inputmode="decimal" class="num-input" id="prod-fil" style="border-color:var(--info); border-width:2px;"></div>
             </div>
-            
-            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap:wrap;"><button class="btn-warning" onclick="addRecipeRow()">+ Malzeme Ekle</button><button class="btn-success" id="save-prod-btn" onclick="saveProduct()">📦 Ürünü Kaydet</button><button class="btn-outline" id="cancel-edit-btn" onclick="cancelEdit()" style="display: none;">İptal</button></div>
+            <div id="recipe-container" style="margin-top:15px;"><label style="margin-bottom:10px;">Kullanılan Aksesuarlar (1 Adet İçin)</label></div>
+            <div style="margin-top: 15px; display: flex; gap: 10px;"><button class="btn-warning" onclick="addRecipeRow()">+ Aksesuar Ekle</button><button class="btn-success" onclick="saveModel()">📦 Modeli Kaydet</button><button class="btn-outline" id="cancel-edit-btn" onclick="cancelEdit()" style="display: none;">İptal</button></div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-            <h3 style="margin: 0; color: var(--primary);">Ürün Kataloğu ve Seri Üretim</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <button class="btn-info" onclick="openProductionHistory()" style="background-color: var(--primary);">🕒 Tüm Üretim Geçmişi</button>
-                <input type="text" id="product-search-input" placeholder="🔍 İsim veya Kod Ara..." oninput="refreshUI()" style="padding: 10px 12px; border: 1px solid #ccd1d9; border-radius: 8px; font-size: 14px; min-width: 220px;">
-            </div>
-        </div>
-        
-        <div id="product-list-container" class="grid-4" style="margin-bottom:20px;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px;"><h3 style="margin: 0; color: var(--primary);">Ürün Kataloğu (A-Z)</h3><button class="btn-info" onclick="openProductionHistory()">🕒 Tüm Üretim Geçmişi</button></div>
+        <div class="search-container"><span class="search-icon">🔍</span><input type="text" class="search-input" id="search-product" placeholder="Ürün adı veya kodu ile ara..." onkeyup="filterProducts()"></div>
+        <div id="product-list-container" class="grid-3" style="margin-bottom:20px;"></div>
     </div>
 
     <div id="tab-locations" style="display: none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap;">
-            <h2 style="margin:0;">Bayi (Toptan Satış) Yönetimi</h2>
-            <p style="margin:0; font-size:12px; color:#7f8c8d;">Eğer perakende (elden) satış yapıyorsanız, buraya "Elden Satış" adında bir bayi ekleyip satışları oradan düşebilirsiniz.</p>
+        <div class="grid-2" style="margin-bottom: 20px;">
+            <div class="stat-card gold"><div class="title">🏆 En Çok Ciro Yapan Bayi</div><div class="value" id="stats-best-dealer" style="font-size:24px;">-</div></div>
+            <div class="stat-card info" style="background: linear-gradient(135deg, #00cec9, #0984e3); color:white;"><div class="title">🔥 En Çok Satan Model</div><div class="value" id="stats-best-model" style="font-size:24px;">-</div></div>
         </div>
-        
-        <div class="grid-2" style="margin-bottom:20px;">
-            <div class="card" style="margin-bottom:0;"><h3 style="margin-bottom:10px; margin-top:0;">Yeni Bayi / Satış Noktası Tanımla</h3><div style="display:flex; gap:10px;"><input type="text" id="new-loc-name" placeholder="Örn: X Kafe" style="flex:1;"><button onclick="createNewLocation()">Ekle</button></div></div>
-        </div>
-        
+        <div class="grid-2" style="margin-bottom:20px;"><div class="card" style="margin-bottom:0;"><h3 style="margin-top:0;">Yeni Bayi Ekle</h3><div style="display:flex; gap:10px;"><input type="text" id="new-loc-name" placeholder="Örn: X Kafe" style="flex:1;"><button onclick="createNewLocation()">Ekle</button></div></div></div>
+        <div class="search-container"><span class="search-icon">🔍</span><input type="text" class="search-input" id="search-dealer" placeholder="Bayi adı ile ara..." onkeyup="filterDealers()"></div>
         <div id="locations-container" class="grid-3"></div>
     </div>
 
     <div id="tab-finance" style="display: none;">
         <h2 style="margin-top: 0;">Nakit Akışı (Toptan Peşin Model)</h2>
         <div class="grid-4" style="margin-bottom: 25px;">
-            <div class="stat-card red"><div class="title">Toplam Hammadde Gideri</div><div class="value" id="fin-total-expense">0.00 ₺</div></div>
+            <div class="stat-card red"><div class="title">Genel Toplam Gider</div><div class="value" id="fin-total-expense">0.00 ₺</div></div>
             <div class="stat-card green"><div class="title">Toplam Satış Geliri</div><div class="value" id="fin-total-revenue">0.00 ₺</div></div>
             <div class="stat-card blue"><div class="title">NET NAKİT KASA</div><div class="value" id="fin-net-cash">0.00 ₺</div></div>
-            <div class="stat-card dark"><div class="title">Fire / Çöp Zararı</div><div class="value" id="fin-waste-loss" style="color:#ff7979">0.00 ₺</div></div>
+            <div class="stat-card dark"><div class="title">Fire Zararı</div><div class="value" id="fin-waste-loss">0.00 ₺</div></div>
         </div>
-        
-        <h2>Varlıklar (Depodaki Malların Değeri)</h2>
+
         <div class="grid-2" style="margin-bottom: 25px;">
-            <div class="card" style="border-left: 5px solid var(--primary);">
-                <h3 style="font-size:14px; margin:0; color:#7f8fa6;">Depodaki Kullanılmamış Hammadde Değeri</h3>
-                <div style="font-size: 26px; font-weight: bold; color: var(--primary);" id="fin-raw-value">0.00 ₺</div>
+            <div class="card" style="border-top: 6px solid var(--danger); margin-bottom:0;">
+                <h3 style="margin-top:0; color:var(--danger);">💸 Diğer Gider (Makine, Kargo vb.) Ekle</h3>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                    <input type="text" id="other-exp-desc" placeholder="Açıklama (Örn: Yeni 3D Yazıcı)" style="flex:2; min-width:150px; padding:10px; border:2px solid #ccd1d9; border-radius:6px;">
+                    <input type="text" inputmode="decimal" class="num-input" id="other-exp-price" placeholder="Tutar (₺)" style="flex:1; min-width:100px; padding:10px; border:2px solid #ccd1d9; border-radius:6px; text-align:center;">
+                    <button class="btn-danger" style="padding:10px 15px;" onclick="addOtherExpense()">Gider Ekle</button>
+                </div>
+                <button class="btn-outline" style="width:100%; border-color:var(--danger); color:var(--danger); padding:10px;" onclick="openOtherExpHistory()">🕒 Geçmiş Diğer Giderleri Gör</button>
             </div>
-            <div class="card" style="border-left: 5px solid var(--success);">
-                <h3 style="font-size:14px; margin:0; color:#7f8fa6;">Depodaki Hazır Anahtarlık Stoğunun Maliyet Değeri</h3>
-                <div style="font-size: 26px; font-weight: bold; color: var(--success);" id="fin-prod-cost">0.00 ₺</div>
+            
+            <div class="card" style="border-top: 6px solid #95a5a6; margin-bottom:0; background:#f9fbfb;">
+                <h3 style="margin-top:0; color:#7f8c8d;">Gider Dağılımı</h3>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:15px;"><span style="color:#555;">Hammadde (Filament + Aksesuar):</span><b id="dist-mat-exp">0.00 ₺</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:15px;"><span style="color:#555;">Diğer Giderler (Makine vb.):</span><b id="dist-other-exp" style="color:var(--danger)">0.00 ₺</b></div>
+                <div style="border-top:2px dashed #ccc; margin:12px 0;"></div>
+                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px; color:var(--primary);"><span>Toplam Çıkan Nakit:</span><b id="dist-total-exp">0.00 ₺</b></div>
             </div>
         </div>
-        
-        <h2 style="border-top: 2px solid #eee; padding-top: 20px;">📈 Özet Analizler</h2>
-        <div class="grid-2">
-            <div class="card">
-                <h3 style="color:var(--primary); margin-top:0;">🏆 En Çok Üretilen Ürünler</h3>
-                <div class="table-responsive"><table><thead><tr><th>Ürün Adı</th><th>Üretim Miktarı</th></tr></thead><tbody id="analytics-most-produced"></tbody></table></div>
-            </div>
-            <div class="card">
-                <h3 style="color:var(--success); margin-top:0;">🌟 En Çok Kazandıran Bayiler</h3>
-                <div class="table-responsive"><table><thead><tr><th>Bayi Adı</th><th>Satılan Adet</th><th>Toplam Ciro</th></tr></thead><tbody id="analytics-top-dealers"></tbody></table></div>
+
+        <h2>Varlıklar (Depodaki Malların Değeri)</h2>
+        <div class="grid-3" style="margin-bottom: 25px;">
+            <div class="card" style="border-left: 6px solid #3498db;"><h3>Eldeki Filamentin Değeri</h3><div style="font-size: 24px; font-weight: bold; color: #3498db;" id="fin-raw-value">0.00 ₺</div></div>
+            <div class="card" style="border-left: 6px solid #9b59b6;"><h3>Eldeki Aksesuarların Değeri</h3><div style="font-size: 24px; font-weight: bold; color: #9b59b6;" id="fin-acc-value">0.00 ₺</div></div>
+            <div class="card" style="border-left: 6px solid #27ae60; padding:15px;">
+                <h3 style="font-size:15px; margin:0 0 10px 0; color:#7f8fa6;">📦 Hazır Ürün Deposu</h3>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span style="color:#7f8c8d;">Maliyet Değeri:</span><b style="color:var(--danger);" id="fin-prod-cost">0.00 ₺</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span style="color:#7f8c8d;">Satış Değeri:</span><b style="color:var(--success);" id="fin-prod-sales">0.00 ₺</b></div>
+                <div style="border-top:1px dashed #ccc; margin:8px 0;"></div>
+                <div style="display:flex; justify-content:space-between;"><span style="font-weight:bold; color:var(--primary);">Net Beklenen Kâr:</span><b style="color:var(--info); font-size:18px;" id="fin-prod-profit">0.00 ₺</b></div>
             </div>
         </div>
     </div>
 </div>
 
-<div id="editMatModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3 style="margin:0;">Hammadde Düzenle</h3><button class="close-btn" onclick="document.getElementById('editMatModal').style.display='none'">✖</button></div>
-        <input type="hidden" id="edit-mat-id">
-        <div class="form-group"><label>Hammadde Adı</label><input type="text" id="edit-mat-name"></div>
-        <div class="grid-3">
-            <div class="form-group">
-                <label>Renk</label>
-                <div style="display:flex; align-items:center; gap:5px;"><span id="edit-mat-color-preview" class="color-dot" style="margin:0; width:16px; height:16px; min-width:16px;"></span><select id="edit-mat-color" style="flex:1;" onchange="document.getElementById('edit-mat-color-preview').style.backgroundColor=this.value"></select></div>
-            </div>
-            <div class="form-group"><label>Birim Tipi</label><select id="edit-mat-unit"><option value="gr">Gram</option><option value="adet">Adet</option></select></div>
-            <div class="form-group"><label>Kritik Uyarı</label><input type="text" inputmode="decimal" class="num-input" id="edit-mat-limit"></div>
+<div id="posModal" class="modal">
+    <div class="modal-content" style="max-width: 900px; padding:0; overflow:hidden;">
+        <div class="modal-header" style="background:var(--primary); color:white; padding:15px 20px; margin:0;">
+            <h3 style="margin:0; color:white;">🛒 Sipariş POS <span id="pos-loc-name" style="opacity:0.8; font-size:16px; font-weight:normal; margin-left:10px;"></span></h3>
+            <button class="close-btn" style="color:white;" onclick="document.getElementById('posModal').style.display='none'">✖</button>
         </div>
-        <button class="btn-success" onclick="saveEditedMaterial()" style="width:100%; margin-top:10px;">Kaydet</button>
+        <div style="padding:15px;">
+            <div class="pos-grid">
+                <div class="pos-section">
+                    <h4 style="margin-top:0; color:var(--secondary);">1. Vitrin (Ürün Ekle)</h4>
+                    <input type="text" id="pos-search" placeholder="Ürün ara..." class="search-input" style="margin-bottom:15px; box-shadow:none; border:2px solid #ccc !important;" onkeyup="renderPosCatalog()">
+                    <div id="pos-catalog-list" style="display:grid; gap:10px;"></div>
+                </div>
+                <div class="pos-section" style="background:#f4f7f6; padding:15px; border-radius:10px; border:2px solid var(--accent); display:flex; flex-direction:column;">
+                    <h4 style="margin-top:0; color:var(--accent); border-bottom:2px solid #dee2e6; padding-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>2. Sepetim</span>
+                        <span id="pos-cart-count" style="background:var(--accent); color:white; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">0 Adet</span>
+                    </h4>
+                    <div id="pos-cart-list" style="flex:1; overflow-y:auto; margin-bottom:15px;"></div>
+                    <div style="background:#fff; padding:15px; border-radius:8px; border:2px solid #ccc;">
+                        <label style="font-size:14px; font-weight:bold; color:var(--success); display:block; text-align:center; margin-bottom:5px;">Toplam Alınan Ücret (₺)</label>
+                        <input type="text" inputmode="decimal" class="num-input" id="pos-total-price" placeholder="Sipariş Tutarı" style="width:100%; font-size:22px; text-align:center; font-weight:bold; color:var(--primary); border:2px solid var(--success);">
+                        <button class="btn-success" onclick="confirmPosOrder()" style="width:100%; font-size:18px; padding:15px; margin-top:15px; box-shadow: 0 4px 10px rgba(39,174,96,0.3);">✅ Siparişi Onayla</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div id="materialHistoryModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
-        <div class="modal-header"><h3 id="mat-history-title" style="margin:0; color:var(--primary);">📦 Stok Hareketleri</h3><button class="close-btn" onclick="document.getElementById('materialHistoryModal').style.display='none'">✖</button></div>
-        <div class="table-responsive"><table><thead><tr><th>Tarih</th><th>İşlem Tipi</th><th>Miktar</th><th>Tutar (Alım)</th><th>İşlem</th></tr></thead><tbody id="mat-history-list"></tbody></table></div>
-    </div>
-</div>
+<div id="otherExpModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; color:var(--danger);">💸 Diğer Gider Geçmişi</h3><button class="close-btn" onclick="document.getElementById('otherExpModal').style.display='none'">✖</button></div><p style="font-size:13px; color:#7f8c8d; margin-top:0;">Buradan silinen giderler otomatik olarak kasanıza iade edilir (Nakit kasanız artar).</p><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody id="other-exp-list"></tbody></table></div></div></div>
+<div id="filHistoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; color:var(--success);">📥 Filament Alım Geçmişi</h3><button class="close-btn" onclick="document.getElementById('filHistoryModal').style.display='none'">✖</button></div><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Miktar</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody id="fil-history-list"></tbody></table></div></div></div>
+<div id="produceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; color:var(--success);">⚙️ Hızlı Üretim</h3><button class="close-btn" onclick="document.getElementById('produceModal').style.display='none'">✖</button></div><input type="hidden" id="modal-prod-id"><h4 id="modal-prod-name" style="text-align:center;"></h4><div id="modal-prod-recipe-info" style="text-align:center; font-size:13px; margin-bottom:20px;"></div><div class="form-group"><label style="text-align:center;">Kaç Adet Ürettiniz?</label><input type="text" class="num-input" id="modal-prod-qty" style="font-size:24px; text-align:center; padding:15px;"></div><button class="btn-success" onclick="confirmProduction()" style="width:100%; padding:15px;">✅ Üret ve Düş</button></div></div>
 
 <div id="productionHistoryModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
-        <div class="modal-header"><h3 style="margin:0; color:var(--primary);">🏭 Tüm Üretim Geçmişi</h3><button class="close-btn" onclick="document.getElementById('productionHistoryModal').style.display='none'">✖</button></div>
-        <p style="font-size:12px; color:#7f8c8d; margin-top:0;">İptal ettiğinizde, harcanan hammaddeler deponuza geri eklenir ve ana depo stoğu düşer.</p>
-        <div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Ürün Adı</th><th>Adet</th><th>İptal Et</th></tr></thead><tbody id="prod-history-list"></tbody></table></div>
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3 style="margin:0;">🏭 Üretim Geçmişi</h3>
+            <button class="close-btn" onclick="document.getElementById('productionHistoryModal').style.display='none'">✖</button>
+        </div>
+        <div class="search-container" style="margin-bottom: 15px;">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="search-prod-history" placeholder="Ürün adı veya tarih ara..." onkeyup="filterProdHistory()" style="padding: 10px 10px 10px 40px !important; border: 2px solid #ccd1d9 !important; border-radius: 8px !important; box-shadow: none;">
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Tarih</th><th>Ürün</th><th>Adet</th><th>Harcananlar</th><th>İptal</th></tr></thead>
+                <tbody id="prod-history-list"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<div id="wasteHistoryModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3 style="margin:0;">🗑️ Fire Geçmişi</h3><button class="close-btn" onclick="document.getElementById('wasteHistoryModal').style.display='none'">✖</button></div>
-        <div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Miktar</th><th>Zarar</th><th>İptal</th></tr></thead><tbody id="waste-history-list"></tbody></table></div>
+<div id="wasteHistoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0;">🗑️ Fire Geçmişi</h3><button class="close-btn" onclick="document.getElementById('wasteHistoryModal').style.display='none'">✖</button></div><div class="table-responsive"><table><tbody id="waste-history-list"></tbody></table></div></div></div>
+
+<div id="accHistoryModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3 style="margin:0; color:var(--purple);" id="acc-history-title">Aksesuar Alım Geçmişi</h3>
+            <button class="close-btn" onclick="document.getElementById('accHistoryModal').style.display='none'">✖</button>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Tarih</th><th>Miktar</th><th>Tutar</th><th>İşlem</th></tr></thead>
+                <tbody id="acc-history-list"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // ==========================================================================
-    // 🛡️ GÜVENLİK VE GİRİŞ KONTROLÜ (Sadece Sayı ve Nokta)
-    // ==========================================================================
-    function restrictInput(event) {
-        const charCode = (event.which) ? event.which : event.keyCode;
-        if (charCode != 46 && (charCode < 48 || charCode > 57)) { event.preventDefault(); return false; }
-        if (charCode == 46 && event.target.value.includes('.')) { event.preventDefault(); return false; }
-    }
+    function restrictInput(event) { const charCode = (event.which) ? event.which : event.keyCode; if (charCode != 46 && (charCode < 48 || charCode > 57)) { event.preventDefault(); return false; } if (charCode == 46 && event.target.value.includes('.')) { event.preventDefault(); return false; } }
     document.addEventListener('keypress', function(e) { if(e.target && e.target.classList.contains('num-input')) restrictInput(e); });
 
-    // ==========================================================================
-    // FIREBASE AYARLARI
-    // ==========================================================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyAUIrw_9NTjYVYEvGlUu1l-qjA-62wjcP4",
-      authDomain: "dtakip-3ff56.firebaseapp.com",
-      projectId: "dtakip-3ff56",
-      storageBucket: "dtakip-3ff56.firebasestorage.app",
-      messagingSenderId: "761520994966",
-      appId: "1:761520994966:web:e56a581a985b63e3d960b7"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyAUIrw_9NTjYVYEvGlUu1l-qjA-62wjcP4", authDomain: "dtakip-3ff56.firebaseapp.com", projectId: "dtakip-3ff56", storageBucket: "dtakip-3ff56.firebasestorage.app", messagingSenderId: "761520994966", appId: "1:761520994966:web:e56a581a985b63e3d960b7" };
+    firebase.initializeApp(firebaseConfig); const firestore = firebase.firestore(); const dbRef = firestore.collection("ERP_Data").doc("Main_Database_V47");
 
-    firebase.initializeApp(firebaseConfig);
-    const firestore = firebase.firestore();
-    const dbRef = firestore.collection("ERP_Data").doc("Main_Database");
+    let db = { globalFilamentLogs: [], models: [], productionLogs: [], locations: [], locationLogs: [], accessories: [], accessoryLogs: [], otherExpenses: [] };
+    let editingModelId = null;
 
-    const siteColors = [
-        { name: "Açık Mavi", rgb: "rgb(0, 173, 249)" }, { name: "Açık Yeşil", rgb: "rgb(0, 250, 78)" }, { name: "Ateş Kırmızı", rgb: "rgb(164, 0, 0)" },
-        { name: "Bakır", rgb: "rgb(192, 109, 0)" }, { name: "Bej", rgb: "rgb(249, 246, 205)" }, { name: "Beyaz", rgb: "rgb(255, 255, 255)" }, 
-        { name: "Gold", rgb: "rgb(247, 185, 0)" }, { name: "Gri", rgb: "rgb(120, 120, 120)" }, { name: "Gümüş Gri", rgb: "rgb(192, 192, 192)" },
-        { name: "Kahverengi", rgb: "rgb(160, 104, 0)" }, { name: "Kırmızı", rgb: "rgb(220, 20, 60)" }, { name: "Mavi", rgb: "rgb(0, 0, 255)" }, 
-        { name: "Sarı", rgb: "rgb(246, 239, 7)" }, { name: "Siyah", rgb: "rgb(0, 0, 0)" }, { name: "Turuncu", rgb: "rgb(255, 165, 0)" },
-        { name: "Yeşil", rgb: "rgb(93, 158, 68)" }, { name: "Yok (Baskısız)", rgb: "transparent" }
-    ];
-
-    function initColors() {
-        let opts = ''; siteColors.forEach(c => { opts += `<option value="${c.rgb}">${c.name}</option>`; });
-        document.getElementById('new-mat-color').innerHTML = opts; document.getElementById('edit-mat-color').innerHTML = opts;
-        document.getElementById('new-mat-color-preview').style.backgroundColor = siteColors[0].rgb;
-    }
-
-    let db = { materials: [], stockLogs: [], products: [], locations: [], locationLogs: [], productionLogs: [], wasteLogs: [], customOrders: [], queue: [] };
-    let currentHistoryMatId = null; 
-    let editingProductId = null; 
-
-    function getNextProductCode() {
-        let maxNum = 0;
-        db.products.forEach(p => { if (p.code && p.code.startsWith("M3D-")) { let numPart = parseInt(p.code.replace("M3D-", ""), 10); if (!isNaN(numPart) && numPart > maxNum) { maxNum = numPart; } } });
-        return "M3D-" + (maxNum + 1).toString().padStart(5, '0');
-    }
-
-    // PROGRAM BAŞLATMA
-    initColors();
-    document.getElementById('log-date').valueAsDate = new Date(); 
+    function getNextProductCode() { let maxNum = 0; db.models.forEach(m => { if (m.code && m.code.startsWith("M3D-")) { let numPart = parseInt(m.code.replace("M3D-", ""), 10); if (!isNaN(numPart) && numPart > maxNum) { maxNum = numPart; } } }); return "M3D-" + (maxNum + 1).toString().padStart(5, '0'); }
 
     dbRef.get().then((doc) => {
-        if (doc.exists) { db = { ...db, ...doc.data() }; if(!db.productionLogs) db.productionLogs = []; } else { saveDB(); }
+        if (doc.exists) { db = { ...db, ...doc.data() }; if(!db.otherExpenses) db.otherExpenses = []; } else { saveDB(); }
         document.getElementById('sync-status').innerHTML = '🟢 Bağlı'; document.getElementById('sync-status').classList.add('connected');
+        if(!editingModelId && document.getElementById('prod-code').value === '') document.getElementById('prod-code').value = getNextProductCode();
         refreshUI();
-        if(!editingProductId && document.getElementById('prod-code').value === '') document.getElementById('prod-code').value = getNextProductCode();
-
         dbRef.onSnapshot((doc) => { 
             if (doc.exists) { 
                 const cloudData = doc.data(); 
                 if(JSON.stringify(db) !== JSON.stringify(cloudData)) { 
-                    db = { ...db, ...cloudData }; if(!db.productionLogs) db.productionLogs = [];
-                    refreshUI(); if(!editingProductId && document.getElementById('prod-code').value === '') document.getElementById('prod-code').value = getNextProductCode();
+                    db = { ...db, ...cloudData }; if(!db.otherExpenses) db.otherExpenses = [];
+                    if(!editingModelId && document.getElementById('prod-code').value === '') document.getElementById('prod-code').value = getNextProductCode(); 
+                    refreshUI(); 
                 } 
             } 
         });
     }).catch(() => { document.getElementById('sync-status').innerHTML = '🔴 Bağlantı Hatası'; });
 
-    function saveDB() {
-        const s = document.getElementById('sync-status'); s.innerHTML = '🔄 Kaydediliyor...'; s.classList.remove('connected');
-        localStorage.setItem('3d_tracker_db_v4', JSON.stringify(db));
-        dbRef.set(db).then(() => { s.innerHTML = '🟢 Kaydedildi'; s.classList.add('connected'); }).catch(() => { s.innerHTML = '🔴 Hata!'; s.style.background = '#fadbd8'; s.style.color = '#c0392b'; });
+    function saveDB() { const s = document.getElementById('sync-status'); s.innerHTML = '🔄 Kaydediliyor...'; s.classList.remove('connected'); dbRef.set(db).then(() => { s.innerHTML = '🟢 Kaydedildi'; s.classList.add('connected'); }).catch(() => { s.innerHTML = '🔴 Hata!'; }); }
+    function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); a.download = "Mete3D_Yedek_V57_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); a.remove(); }
+    function switchTab(tab) { ['materials', 'products', 'locations', 'finance'].forEach(t => { document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; document.getElementById('tab-btn-' + t).className = 'nav-btn' + (t === tab ? ' active' : ''); }); refreshUI(); }
+    function filterProducts() { const input = document.getElementById('search-product').value.toLowerCase(); document.querySelectorAll('.prod-card-item').forEach(card => { card.style.display = card.innerText.toLowerCase().includes(input) ? '' : 'none'; }); }
+    function filterDealers() { const input = document.getElementById('search-dealer').value.toLowerCase(); document.querySelectorAll('.dealer-card-item').forEach(card => { card.style.display = card.innerText.toLowerCase().includes(input) ? '' : 'none'; }); }
+
+    // YENİ: Üretim Geçmişi Arama Fonksiyonu (V57)
+    function filterProdHistory() {
+        const input = document.getElementById('search-prod-history').value.toLowerCase();
+        const rows = document.querySelectorAll('#prod-history-list tr');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? '' : 'none';
+        });
     }
 
-    function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); a.download = "Mete3D_Yedek_" + new Date().toISOString().slice(0,10) + ".json"; document.body.appendChild(a); a.click(); a.remove(); }
-    
-    function switchTab(tab) { 
-        ['materials', 'products', 'locations', 'finance'].forEach(t => { 
-            document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; 
-            document.getElementById('tab-btn-' + t).className = 'nav-btn' + (t === tab ? ' active' : ''); 
-        }); 
-        refreshUI(); 
+    function addOtherExpense() {
+        const desc = document.getElementById('other-exp-desc').value.trim() || 'Belirtilmedi';
+        const amount = parseFloat(document.getElementById('other-exp-price').value);
+        if(isNaN(amount) || amount <= 0) return alert('Geçerli bir tutar girin!');
+        db.otherExpenses.push({ id: 'OEXP-' + Date.now(), date: new Date().toISOString().slice(0,10), desc: desc, amount: amount });
+        saveDB(); document.getElementById('other-exp-desc').value = ''; document.getElementById('other-exp-price').value = ''; refreshUI();
+    }
+    function deleteOtherExpense(id) { if(confirm("Bu gideri silmek istediğinize emin misiniz? Nakit kasanız artacaktır.")) { db.otherExpenses = db.otherExpenses.filter(e => e.id !== id); saveDB(); openOtherExpHistory(); refreshUI(); } }
+    function openOtherExpHistory() {
+        const tbody = document.getElementById('other-exp-list'); tbody.innerHTML = '';
+        const logs = (db.otherExpenses || []).slice().reverse();
+        if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">Kayıtlı gider yok.</td></tr>'; } 
+        else { logs.forEach(e => { tbody.innerHTML += `<tr><td>${e.date}</td><td>${e.desc}</td><td style="color:var(--danger); font-weight:bold;">${e.amount.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteOtherExpense('${e.id}')">Sil</button></td></tr>`; }); }
+        document.getElementById('otherExpModal').style.display = 'flex';
     }
 
-    // HAMMADDE İŞLEMLERİ
-    function createNewMaterial() { const n = document.getElementById('new-mat-name').value; const unit = document.getElementById('new-mat-unit').value; const color = document.getElementById('new-mat-color').value; const limit = parseFloat(document.getElementById('new-mat-limit').value) || 0; if(n) { db.materials.push({ id: 'MAT-'+Date.now(), name: n, unit: unit, color: color, alertLimit: limit }); saveDB(); document.getElementById('new-mat-name').value = ''; document.getElementById('new-mat-limit').value = ''; document.getElementById('new-mat-color').selectedIndex = 0; document.getElementById('new-mat-color-preview').style.backgroundColor = siteColors[0].rgb; refreshUI(); } }
-    function editMaterial(id) { const mat = db.materials.find(m => m.id === id); if(!mat) return; document.getElementById('edit-mat-id').value = id; document.getElementById('edit-mat-name').value = mat.name; document.getElementById('edit-mat-unit').value = mat.unit || 'gr'; document.getElementById('edit-mat-color').value = mat.color || 'transparent'; document.getElementById('edit-mat-color-preview').style.backgroundColor = mat.color || 'transparent'; document.getElementById('edit-mat-limit').value = mat.alertLimit || 0; document.getElementById('editMatModal').style.display = 'flex'; }
-    function saveEditedMaterial() { const id = document.getElementById('edit-mat-id').value; const name = document.getElementById('edit-mat-name').value; const unit = document.getElementById('edit-mat-unit').value; const color = document.getElementById('edit-mat-color').value; const limit = parseFloat(document.getElementById('edit-mat-limit').value) || 0; if(!name) return; const mat = db.materials.find(m => m.id === id); if(mat) { mat.name = name.trim(); mat.unit = unit; mat.color = color; mat.alertLimit = limit; saveDB(); refreshUI(); document.getElementById('editMatModal').style.display = 'none'; } }
-    function quickAddStock(matId) { const q = parseFloat(document.getElementById(`q-mat-qty-${matId}`).value); const p = parseFloat(document.getElementById(`q-mat-price-${matId}`).value) || 0; if(!q || q <= 0) return alert("Miktar girin!"); const d = new Date().toISOString().slice(0,10); db.stockLogs.push({id: 'LOG-'+Date.now(), matId: matId, date: d, type: 'IN', qty: q, price: p}); saveDB(); refreshUI(); }
-    function addStockLog() { const m = document.getElementById('log-mat-select').value; const q = parseFloat(document.getElementById('log-qty').value); const p = parseFloat(document.getElementById('log-price').value) || 0; const d = document.getElementById('log-date').value; if(m && q && d) { db.stockLogs.push({id: 'LOG-'+Date.now(), matId: m, date: d, type: 'IN', qty: q, price: p}); saveDB(); document.getElementById('log-qty').value = ''; document.getElementById('log-price').value = ''; refreshUI(); } }
-    function openMaterialHistory(matId) { currentHistoryMatId = matId; const mat = db.materials.find(m => m.id === matId); if(!mat) return; document.getElementById('mat-history-title').innerText = `📦 ${mat.name} - Geçmiş`; const tbody = document.getElementById('mat-history-list'); tbody.innerHTML = ''; const logs = db.stockLogs.filter(l => l.matId === matId).slice().reverse(); if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kayıt yok.</td></tr>'; } else { logs.forEach(l => { const typeLabel = l.type === 'IN' ? '<span style="color:var(--success);font-weight:bold;">🟢 Alım</span>' : '<span style="color:var(--danger);font-weight:bold;">🔴 Çıkış</span>'; const priceLabel = l.type === 'IN' ? `${(l.price||0).toFixed(2)} ₺` : '-'; tbody.innerHTML += `<tr><td>${l.date}</td><td>${typeLabel}</td><td><b>${parseFloat(l.qty).toFixed(2)} ${mat.unit||'gr'}</b></td><td>${priceLabel}</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteStockLog('${l.id}')">Sil</button></td></tr>`; }); } document.getElementById('materialHistoryModal').style.display = 'flex'; }
-    function deleteStockLog(logId) { if(confirm("Silmek istediğinize emin misiniz?")) { db.stockLogs = db.stockLogs.filter(l => l.id !== logId); saveDB(); if(currentHistoryMatId) openMaterialHistory(currentHistoryMatId); refreshUI(); } }
-    function addGlobalWasteLog() { const q = parseFloat(document.getElementById('waste-qty').value); const desc = document.getElementById('waste-desc').value || 'Genel Fire'; if(q > 0) { let totalGrams = 0; let totalValue = 0; db.materials.forEach(m => { if(m.unit === 'gr') { const st = calculateMaterialStats(m.id); totalGrams += st.stock; totalValue += (st.stock * st.avgCost); } }); let globalAvgCost = totalGrams > 0 ? (totalValue / totalGrams) : 0; let costOfWaste = globalAvgCost * q; db.wasteLogs.push({id: 'WST-'+Date.now(), date: new Date().toISOString().slice(0,10), qty: q, cost: costOfWaste, desc: desc}); saveDB(); document.getElementById('waste-qty').value = ''; document.getElementById('waste-desc').value = ''; alert(`${q} gr Fire kaydedildi.`); refreshUI(); } }
-    function openWasteHistory() { const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = ''; if(db.wasteLogs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Fire kaydı yok.</td></tr>'; } else { db.wasteLogs.slice().reverse().forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.qty.toFixed(2)} gr</b></td><td style="color:var(--danger)">${w.cost.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px; min-height:0;" onclick="deleteWasteLog('${w.id}')">X</button></td></tr>`; }); } document.getElementById('wasteHistoryModal').style.display = 'flex'; }
-    function deleteWasteLog(id) { if(confirm("İptal etmek istiyor musunuz?")) { db.wasteLogs = db.wasteLogs.filter(w => w.id !== id); saveDB(); openWasteHistory(); refreshUI(); } }
-    function calculateMaterialStats(matId) { let s = 0, c = 0, p = 0; db.stockLogs.forEach(l => { if(l.matId === matId) { if(l.type === 'IN') { s += l.qty; c += (l.price || 0); p += l.qty; } else { s -= l.qty; } } }); return { stock: s, avgCost: p > 0 ? (c / p) : 0 }; }
-    function deleteMaterial(id) { const usedInLogs = db.stockLogs.some(l => l.matId === id); const usedInRecipes = db.products.some(p => p.recipe.some(r => r.matId === id)); if (usedInLogs || usedInRecipes) { alert("⚠️ SİLİNEMEZ! Geçmiş kayıt veya reçeteye bağlı."); return; } if (confirm("Silmek istediğinize emin misiniz?")) { db.materials = db.materials.filter(m => m.id !== id); saveDB(); refreshUI(); } }
-    
-    // REÇETE SİSTEMİ
-    function updateRecipeInputUnit(sel) { const opt = sel.options[sel.selectedIndex]; const unit = opt.getAttribute('data-unit') || 'gr'; const col = opt.getAttribute('data-color') || 'transparent'; sel.parentElement.nextElementSibling.querySelector('input').placeholder = `Miktar (${unit})`; const dot = sel.parentElement.querySelector('.recipe-color-preview'); if(dot) dot.style.backgroundColor = col; }
-    function addRecipeRow(m='', q='') { const c = document.getElementById('recipe-container'); const r = 'row-' + Date.now() + Math.random().toString(36).substr(2,5); let o = '<option value="" data-unit="gr" data-color="transparent">-Malzeme Seç-</option>'; let sUnit = 'gr'; let sColor = 'transparent'; db.materials.forEach(mat => { const u = mat.unit || 'gr'; const col = mat.color || 'transparent'; if(mat.id === m) { sUnit = u; sColor = col; } o += `<option value="${mat.id}" data-unit="${u}" data-color="${col}" ${mat.id === m ? 'selected' : ''}>${mat.name}</option>`; }); c.insertAdjacentHTML('beforeend', `<div class="recipe-row" id="${r}"><div class="form-group" style="display:flex; align-items:center; gap:8px;"><span class="color-dot recipe-color-preview" style="background-color:${sColor}; margin:0; width:16px; height:16px; min-width:16px;"></span><select class="recipe-mat-select" style="flex:1;" onchange="updateRecipeInputUnit(this)">${o}</select></div><div class="form-group"><input type="text" inputmode="decimal" class="recipe-qty-input num-input" placeholder="Miktar (${sUnit})" value="${q}"></div><button class="btn-danger" onclick="document.getElementById('${r}').remove()">X</button></div>`); }
+    let currentOrderCart = []; let currentOrderLocId = null; let currentEditingLogId = null;
 
-    // ÜRÜN İŞLEMLERİ 
-    function saveProduct() { 
-        const n = document.getElementById('prod-name').value; const p = parseFloat(document.getElementById('prod-price').value) || 0; 
-        let c = document.getElementById('prod-code').value; if(!c || c.trim() === '') c = getNextProductCode(); 
+    function getModelsWithStock(excludeLogId = null) {
+        let produced = {}; let sold = {};
+        db.productionLogs.forEach(l => { produced[l.modelId] = (produced[l.modelId]||0) + l.qty; });
+        db.locationLogs.forEach(l => { if(l.type === 'SALE' && l.items && l.id !== excludeLogId) { l.items.forEach(i => sold[i.modelId] = (sold[i.modelId]||0) + i.qty); } });
+        return db.models.map(m => { return { ...m, stock: (produced[m.id]||0) - (sold[m.id]||0) }; });
+    }
+
+    function openPosModal(locId) {
+        currentOrderLocId = locId; currentEditingLogId = null; currentOrderCart = [];
+        const loc = db.locations.find(x => x.id === locId);
+        document.getElementById('pos-loc-name').innerText = `> ${loc ? loc.name : ''}`; document.getElementById('pos-total-price').value = '';
+        document.getElementById('posModal').style.display = 'flex'; renderPosCatalog(); renderPosCart();
+    }
+
+    function editLocationLog(logId) {
+        const log = db.locationLogs.find(x => x.id === logId); if(!log || log.type !== 'SALE') return;
+        currentEditingLogId = logId; currentOrderLocId = log.locId; currentOrderCart = log.items ? JSON.parse(JSON.stringify(log.items)) : [];
+        const loc = db.locations.find(x => x.id === log.locId);
+        document.getElementById('pos-loc-name').innerText = `> ${loc ? loc.name : ''} (Düzenleniyor)`; document.getElementById('pos-total-price').value = log.price;
+        document.getElementById('posModal').style.display = 'flex'; renderPosCatalog(); renderPosCart();
+    }
+
+    function renderPosCatalog() {
+        const list = document.getElementById('pos-catalog-list'); const search = document.getElementById('pos-search').value.toLowerCase();
+        const models = getModelsWithStock(currentEditingLogId).sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+        let html = '';
+        models.forEach(m => {
+            if(search && !m.name.toLowerCase().includes(search) && !(m.code && m.code.toLowerCase().includes(search))) return;
+            let stockColor = m.stock > 0 ? "var(--success)" : "var(--danger)";
+            html += `<div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #ccc; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-weight:bold; color:var(--primary); font-size:15px;">${m.name}</div><div style="font-size:12px; color:${stockColor}; font-weight:bold;">Mevcut Stok: ${m.stock}</div></div><div style="display:flex; gap:6px;"><input type="text" id="pos-qty-${m.id}" class="num-input" placeholder="Adet" style="width:55px; padding:8px; text-align:center; border:2px solid #eee; border-radius:6px; font-weight:bold;"><button class="btn-info" style="padding:8px 12px; font-size:13px;" onclick="addToCart('${m.id}', ${m.stock})">Sepete Ekle</button></div></div>`;
+        });
+        list.innerHTML = html || '<div style="text-align:center; padding:10px; color:#999;">Ürün bulunamadı.</div>';
+    }
+
+    function addToCart(modelId, maxStock) {
+        const qtyInput = document.getElementById(`pos-qty-${modelId}`); const qty = parseInt(qtyInput.value);
+        if(isNaN(qty) || qty <= 0) return alert('Geçerli bir adet girin.');
+        const existing = currentOrderCart.find(x => x.modelId === modelId); const totalWanted = (existing ? existing.qty : 0) + qty;
+        if(totalWanted > maxStock) return alert(`Stok yetersiz! (Toplam Ekleyebileceğiniz: ${maxStock})`);
+        if(existing) { existing.qty += qty; } else { currentOrderCart.push({ modelId: modelId, qty: qty }); }
+        qtyInput.value = ''; renderPosCart();
+    }
+    function removeFromCart(modelId) { currentOrderCart = currentOrderCart.filter(x => x.modelId !== modelId); renderPosCart(); }
+    function updateCartQty(modelId, newQty) {
+        newQty = parseInt(newQty); if(isNaN(newQty) || newQty <= 0) return removeFromCart(modelId);
+        const maxStock = getModelsWithStock(currentEditingLogId).find(x=>x.id===modelId).stock;
+        if(newQty > maxStock) { alert(`Stok yetersiz! (Maks: ${maxStock})`); renderPosCart(); return; }
+        const item = currentOrderCart.find(x => x.modelId === modelId); if(item) item.qty = newQty;
+        renderPosCart();
+    }
+
+    function renderPosCart() {
+        const list = document.getElementById('pos-cart-list');
+        let totalCartQty = currentOrderCart.reduce((s, i) => s + i.qty, 0);
+        document.getElementById('pos-cart-count').innerText = totalCartQty + " Adet";
+
+        if(currentOrderCart.length === 0) { list.innerHTML = '<div style="text-align:center; color:#7f8c8d; padding:30px 10px; font-size:16px;">Sepetiniz henüz boş.<br><span style="font-size:30px; margin-top:10px; display:block;">🛒</span></div>'; return; }
         
-        if(!n) return alert("Ürün adı giriniz!"); 
-        let r = []; document.querySelectorAll('.recipe-row').forEach(row => { const m = row.querySelector('.recipe-mat-select').value; const q = parseFloat(row.querySelector('.recipe-qty-input').value); if(m && q) r.push({matId: m, qty: q}); }); 
-        if(r.length === 0) return alert("En az 1 malzeme ekleyin!"); 
-        
-        if(editingProductId) { const pr = db.products.find(x => x.id === editingProductId); pr.name = n; pr.sellPrice = p; pr.code = c; pr.recipe = r; cancelEdit(); } 
-        else { db.products.push({id: 'PROD-'+Date.now(), name: n, sellPrice: p, code: c, recipe: r}); cancelEdit(); } 
-        saveDB(); refreshUI(); 
+        let html = '';
+        currentOrderCart.forEach(item => {
+            const m = db.models.find(x => x.id === item.modelId); const mName = m ? m.name : 'Bilinmeyen Ürün';
+            html += `<div style="background:#fff; padding:10px; border-radius:6px; border:1px solid #ddd; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 4px rgba(0,0,0,0.02);"><div style="font-size:14px; font-weight:bold; color:var(--primary); line-height:1.2;">${mName}</div><div style="display:flex; align-items:center; gap:8px;"><input type="text" class="num-input" value="${item.qty}" onchange="updateCartQty('${item.modelId}', this.value)" style="width:50px; padding:6px; text-align:center; font-size:14px; border:1px solid #ccc; border-radius:4px;"><button class="btn-danger" style="padding:6px 10px; font-size:14px; font-weight:bold;" onclick="removeFromCart('${item.modelId}')">X</button></div></div>`;
+        });
+        list.innerHTML = html;
     }
     
-    function editProduct(id) { 
-        const pr=db.products.find(x=>x.id===id); if(!pr)return; editingProductId=id; 
-        document.getElementById('prod-name').value=pr.name; document.getElementById('prod-price').value=pr.sellPrice; document.getElementById('prod-code').value=pr.code || ""; 
-        const c = document.getElementById('recipe-container'); c.innerHTML = '<label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>'; 
-        pr.recipe.forEach(i=>addRecipeRow(i.matId, i.qty)); document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); 
-    }
-    function cancelEdit() { editingProductId = null; document.getElementById('prod-name').value = ''; document.getElementById('prod-price').value = ''; document.getElementById('prod-code').value = getNextProductCode(); const c = document.getElementById('recipe-container'); c.innerHTML = '<label style="font-weight: 600; font-size: 13px; color: var(--secondary); margin-bottom: 5px; display: block;">Kullanılacak Malzemeler *</label>'; document.getElementById('cancel-edit-btn').style.display = 'none'; }
-    function cloneProduct(id) { const pr = db.products.find(x => x.id === id); if(!pr) return; editProduct(id); editingProductId = null; document.getElementById('prod-name').value = pr.name + " (Kopya)"; document.getElementById('prod-code').value = getNextProductCode(); }
-    function deleteProduct(id) { if(confirm("Ürünü silmek istediğinize emin misiniz?")) { db.products = db.products.filter(x => x.id !== id); saveDB(); refreshUI(); } }
-
-    // HIZLI ÜRETİM
-    function quickProduce(prodId) {
-        const qInput = document.getElementById(`q-prod-qty-list-${prodId}`);
-        const q = parseInt(qInput.value);
-        if(isNaN(q) || q <= 0) return alert("Lütfen üretilecek adeti girin!");
-        
-        const pr = db.products.find(x => x.id === prodId); 
-        let relatedLogIds = []; 
-        pr.recipe.forEach(i => { 
-            const newLogId = 'LOG-'+Date.now()+Math.random().toString(36).substr(2,5); relatedLogIds.push(newLogId); 
-            db.stockLogs.push({id: newLogId, matId: i.matId, date: new Date().toISOString().slice(0,10), type: 'OUT', qty: i.qty * q, price: 0}); 
-        }); 
-        
-        db.productionLogs.push({ id: 'PRODLOG-' + Date.now(), prodId: prodId, prodName: pr.name, qty: q, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), relatedStockLogs: relatedLogIds });
-        saveDB(); refreshUI(); 
+    function confirmPosOrder() {
+        if(currentOrderCart.length === 0) return alert('Sepet boş. Lütfen ürün ekleyin.');
+        const p = parseFloat(document.getElementById('pos-total-price').value) || 0;
+        let totalQty = 0; currentOrderCart.forEach(i => totalQty += i.qty);
+        if(currentEditingLogId) { const log = db.locationLogs.find(x => x.id === currentEditingLogId); if(log) { log.qty = totalQty; log.price = p; log.items = currentOrderCart; } } 
+        else { db.locationLogs.push({ id: 'LLOG-'+Date.now(), timestamp: Date.now(), date: new Date().toISOString().slice(0,10), locId: currentOrderLocId, type: 'SALE', qty: totalQty, price: p, items: currentOrderCart }); }
+        saveDB(); document.getElementById('posModal').style.display = 'none'; refreshUI();
     }
 
-    function openProductionHistory() {
-        const tbody = document.getElementById('prod-history-list'); tbody.innerHTML = '';
-        if(!db.productionLogs) db.productionLogs = []; const logs = db.productionLogs.slice().reverse();
-        if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Henüz üretim yapılmamış.</td></tr>'; } else {
-            logs.forEach(l => { const pr = db.products.find(p => p.id === l.prodId); const pName = pr ? pr.name : l.prodName + " (Silinmiş)";
-                tbody.innerHTML += `<tr><td>${l.date}</td><td><b>${pName}</b></td><td><span style="color:var(--success); font-weight:bold;">+${l.qty}</span></td><td><button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="cancelProduction('${l.id}')">İptal</button></td></tr>`;
-            });
-        } document.getElementById('productionHistoryModal').style.display = 'flex';
-    }
-
-    function cancelProduction(logId) {
-        if(!confirm("İPTAL edip malzemeleri geri almak istediğinize emin misiniz?")) return;
-        const pLog = db.productionLogs.find(x => x.id === logId); if(!pLog) return;
-        if(pLog.relatedStockLogs && pLog.relatedStockLogs.length > 0) db.stockLogs = db.stockLogs.filter(log => !pLog.relatedStockLogs.includes(log.id));
-        db.productionLogs = db.productionLogs.filter(x => x.id !== logId); saveDB(); openProductionHistory(); refreshUI(); 
-    }
+    function createAccessory() { const n = document.getElementById('new-acc-name').value; if(!n) return alert("Ad girin!"); db.accessories.push({id: 'ACC-'+Date.now(), name: n.trim()}); saveDB(); document.getElementById('new-acc-name').value = ''; refreshUI(); }
+    function deleteAccessory(id) { if(db.models.some(m => m.recipe && m.recipe.some(r => r.accId === id))) return alert("Reçetede kullanılıyor."); if(confirm("Sil?")) { db.accessories = db.accessories.filter(a => a.id !== id); saveDB(); refreshUI(); } }
+    function addAccStock(accId) { const q = parseInt(document.getElementById(`acc-in-qty-${accId}`).value); const p = parseFloat(document.getElementById(`acc-in-price-${accId}`).value) || 0; if(isNaN(q) || q <= 0) return; db.accessoryLogs.push({ id: 'ALOG-'+Date.now(), accId: accId, date: new Date().toISOString().slice(0,10), type: 'IN', qty: q, price: p }); saveDB(); refreshUI(); }
     
-    // BAYİ İŞLEMLERİ (Toptan Peşin Model)
+    // YENİ: SADELEŞTİRİLMİŞ AKSESUAR GEÇMİŞİ (Sadece 'IN' işlemleri) (V57)
+    let currentAccHistoryId = null; 
+    function openAccHistory(accId) { 
+        currentAccHistoryId = accId; const acc = db.accessories.find(a => a.id === accId); if(!acc) return; 
+        document.getElementById('acc-history-title').innerText = `🔗 ${acc.name} - Alım Geçmişi`; 
+        const tbody = document.getElementById('acc-history-list'); tbody.innerHTML = ''; 
+        // Burada sadece 'IN' filtrelemesi yapıyoruz
+        const logs = db.accessoryLogs.filter(l => l.accId === accId && l.type === 'IN').slice().reverse(); 
+        if(logs.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Kayıt yok</td></tr>'; 
+        else { 
+            logs.forEach(l => { 
+                tbody.innerHTML += `<tr><td>${l.date}</td><td><b>${l.qty}</b></td><td>${l.price.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px;" onclick="deleteAccLog('${l.id}')">Sil</button></td></tr>`; 
+            }); 
+        } 
+        document.getElementById('accHistoryModal').style.display = 'flex'; 
+    }
+    function deleteAccLog(logId) { if(confirm("Silmek istediğinize emin misiniz?")) { db.accessoryLogs = db.accessoryLogs.filter(l => l.id !== logId); saveDB(); if(currentAccHistoryId) openAccHistory(currentAccHistoryId); refreshUI(); } }
+
+    function getAccStock(accId) { let s = 0; db.accessoryLogs.filter(l => l.accId === accId).forEach(l => { if(l.type === 'IN') s += l.qty; if(l.type === 'OUT') s -= l.qty; }); return s; }
+    
+    function openFilHistory() {
+        const tbody = document.getElementById('fil-history-list'); tbody.innerHTML = '';
+        const logs = db.globalFilamentLogs.filter(l => l.type === 'IN').slice().reverse();
+        if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">Kayıt yok.</td></tr>'; }
+        else { logs.forEach(l => { tbody.innerHTML += `<tr><td>${l.date}</td><td><b>${l.grams} gr</b></td><td>${l.price.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px;" onclick="deleteGlobalFilamentLog('${l.id}')">Sil</button></td></tr>`; }); }
+        document.getElementById('filHistoryModal').style.display = 'flex';
+    }
+    function deleteGlobalFilamentLog(id) { if(confirm("Silmek istediğinize emin misiniz? Depodaki filament miktarınız düşecektir.")) { db.globalFilamentLogs = db.globalFilamentLogs.filter(l => l.id !== id); saveDB(); openFilHistory(); refreshUI(); } }
+    
+    function addGlobalFilament() { const g = parseFloat(document.getElementById('buy-fil-qty').value); const p = parseFloat(document.getElementById('buy-fil-price').value) || 0; if(!g || g <= 0) return; db.globalFilamentLogs.push({ id: 'GFIL-'+Date.now(), date: new Date().toISOString().slice(0,10), type: 'IN', grams: g, price: p }); saveDB(); document.getElementById('buy-fil-qty').value = ''; document.getElementById('buy-fil-price').value = ''; refreshUI(); }
+    
+    function addGlobalWaste() { const g = parseFloat(document.getElementById('waste-qty').value); const desc = document.getElementById('waste-desc').value || 'Belirtilmedi'; if(!g || g <= 0) return; const stats = getGlobalFilamentStats(); if(g > stats.currentStock) return; const cost = g * stats.avgCostPerGram; db.globalFilamentLogs.push({ id: 'WST-'+Date.now(), date: new Date().toISOString().slice(0,10), type: 'WASTE', grams: g, cost: cost, desc: desc }); saveDB(); document.getElementById('waste-qty').value = ''; document.getElementById('waste-desc').value = ''; refreshUI(); }
+    function openWasteHistory() { const tbody = document.getElementById('waste-history-list'); tbody.innerHTML = ''; const logs = db.globalFilamentLogs.filter(l => l.type === 'WASTE').slice().reverse(); if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kayıt yok</td></tr>'; } else { logs.forEach(w => { tbody.innerHTML += `<tr><td>${w.date}</td><td>${w.desc}</td><td><b>${w.grams} gr</b></td><td>${w.cost.toFixed(2)} ₺</td><td><button class="btn-danger" style="padding:4px 8px;" onclick="deleteWasteLog('${w.id}')">Sil</button></td></tr>`; }); } document.getElementById('wasteHistoryModal').style.display = 'flex'; }
+    function deleteWasteLog(id) { if(confirm("İptal etmek istediğinize emin misiniz?")) { db.globalFilamentLogs = db.globalFilamentLogs.filter(w => w.id !== id); saveDB(); openWasteHistory(); refreshUI(); } }
+    
+    function getGlobalFilamentStats() { let tIn=0, pIn=0, tOut=0; db.globalFilamentLogs.forEach(l => { if(l.type === 'IN') { tIn += l.grams; pIn += l.price; } if(l.type === 'WASTE') { tOut += l.grams; } }); db.productionLogs.forEach(p => { tOut += p.gramsUsed; }); return { currentStock: tIn - tOut, avgCostPerGram: tIn > 0 ? (pIn / tIn) : 0, totalExpense: pIn }; }
+
+    function addRecipeRow(accId='', qty='') { const c = document.getElementById('recipe-container'); const rId = 'row-' + Date.now(); let opts = '<option value="">-- Aksesuar Seç --</option>'; db.accessories.forEach(a => { opts += `<option value="${a.id}" ${a.id === accId ? 'selected' : ''}>${a.name}</option>`; }); c.insertAdjacentHTML('beforeend', `<div class="recipe-row" id="${rId}"><select class="recipe-acc-select" style="flex:2; padding:10px; border-radius:6px; border:2px solid #ccd1d9; outline:none;">${opts}</select><input type="text" inputmode="decimal" class="recipe-qty-input num-input" placeholder="Adet" value="${qty}" style="flex:1; padding:10px; border-radius:6px; border:2px solid #ccd1d9; text-align:center;"><button class="btn-danger" style="padding:10px 15px; border-radius:6px; font-weight:bold;" onclick="document.getElementById('${rId}').remove()">X</button></div>`); }
+    function saveModel() { const n = document.getElementById('prod-name').value; let c = document.getElementById('prod-code').value; const p = parseFloat(document.getElementById('prod-price').value) || 0; const f = parseFloat(document.getElementById('prod-fil').value); if(!c || c.trim() === '') c = getNextProductCode(); if(!n) return alert("Ad yazın!"); if(isNaN(f) || f <= 0) return alert("Gramaj yazın!"); let r = []; document.querySelectorAll('.recipe-row').forEach(row => { const acc = row.querySelector('.recipe-acc-select').value; const qty = parseInt(row.querySelector('.recipe-qty-input').value); if(acc && qty > 0) r.push({accId: acc, qty: qty}); }); if(editingModelId) { const mod = db.models.find(x => x.id === editingModelId); mod.name = n.trim(); mod.code = c; mod.sellPrice = p; mod.filGr = f; mod.recipe = r; } else { db.models.push({id: 'MOD-'+Date.now(), name: n.trim(), code: c, sellPrice: p, filGr: f, recipe: r}); } cancelEdit(); saveDB(); refreshUI(); }
+    function editModel(id) { const m=db.models.find(x=>x.id===id); if(!m)return; editingModelId=id; document.getElementById('prod-name').value=m.name; document.getElementById('prod-code').value=m.code || ""; document.getElementById('prod-price').value=m.sellPrice || ""; document.getElementById('prod-fil').value=m.filGr; const c = document.getElementById('recipe-container'); c.innerHTML = '<label style="margin-bottom:10px;">Kullanılan Aksesuarlar (1 Adet İçin)</label>'; if(m.recipe) m.recipe.forEach(i=>addRecipeRow(i.accId, i.qty)); document.getElementById('cancel-edit-btn').style.display='inline-block'; window.scrollTo({top:0}); }
+    function cancelEdit() { editingModelId = null; document.getElementById('prod-name').value = ''; document.getElementById('prod-code').value = getNextProductCode(); document.getElementById('prod-price').value = ''; document.getElementById('prod-fil').value = ''; document.getElementById('recipe-container').innerHTML = '<label style="margin-bottom:10px;">Kullanılan Aksesuarlar (1 Adet İçin)</label>'; document.getElementById('cancel-edit-btn').style.display = 'none'; }
+    function deleteModel(id) { if(confirm("Sil?")) { db.models = db.models.filter(m => m.id !== id); saveDB(); refreshUI(); } }
+
+    function openProduceModal(id) { const m = db.models.find(x => x.id === id); if(!m) return; document.getElementById('modal-prod-id').value = id; document.getElementById('modal-prod-name').innerText = "📦 " + m.name; document.getElementById('modal-prod-qty').value = ''; let rInfo = `Sistem şunları düşecek:<br><b>${m.filGr} gr Filament</b>`; if(m.recipe && m.recipe.length > 0) { m.recipe.forEach(r => { const a = db.accessories.find(x=>x.id===r.accId); if(a) rInfo += `, <b>${r.qty} adet ${a.name}</b>`; }); } document.getElementById('modal-prod-recipe-info').innerHTML = rInfo; document.getElementById('produceModal').style.display = 'flex'; }
+    function confirmProduction() { const mId = document.getElementById('modal-prod-id').value; const q = parseInt(document.getElementById('modal-prod-qty').value); if(isNaN(q) || q <= 0) return alert("Adet girin!"); const m = db.models.find(x => x.id === mId); const reqFil = q * m.filGr; const fStats = getGlobalFilamentStats(); if(reqFil > fStats.currentStock) return alert(`Depoda yeterli filament yok`); if(m.recipe && m.recipe.length > 0) { for(let r of m.recipe) { const a = db.accessories.find(x=>x.id===r.accId); const reqAcc = q * r.qty; const curAcc = getAccStock(r.accId); if(reqAcc > curAcc) return alert(`Yeterli aksesuar yok`); } } let totalCostAssigned = reqFil * fStats.avgCostPerGram; let generatedAccLogIds = []; if(m.recipe && m.recipe.length > 0) { m.recipe.forEach(r => { let aIn=0, aPaid=0; db.accessoryLogs.filter(l=>l.accId===r.accId && l.type==='IN').forEach(l=>{aIn+=l.qty; aPaid+=l.price;}); let aAvg = aIn>0 ? (aPaid/aIn) : 0; totalCostAssigned += (q * r.qty * aAvg); const aLogId = 'ALOG-'+Date.now()+Math.random().toString(36).substr(2,5); db.accessoryLogs.push({ id: aLogId, accId: r.accId, date: new Date().toISOString().slice(0,10), type: 'OUT', qty: q * r.qty, price: 0 }); generatedAccLogIds.push(aLogId); }); } db.productionLogs.push({ id: 'PRODLOG-'+Date.now(), modelId: mId, qty: q, gramsUsed: reqFil, relatedAccLogIds: generatedAccLogIds, costAssigned: totalCostAssigned, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}) }); saveDB(); document.getElementById('produceModal').style.display = 'none'; refreshUI(); }
+    
+    function openProductionHistory() { 
+        document.getElementById('search-prod-history').value = ''; // Aramayı sıfırla
+        const tbody = document.getElementById('prod-history-list'); tbody.innerHTML = ''; 
+        const logs = db.productionLogs.slice().reverse(); 
+        if(logs.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kayıt yok</td></tr>'; } 
+        else { 
+            logs.forEach(l => { 
+                const mod = db.models.find(m => m.id === l.modelId); const mName = mod ? mod.name : "Silinmiş"; let usedStr = `${l.gramsUsed} gr`; 
+                if(l.relatedAccLogIds && l.relatedAccLogIds.length > 0) { l.relatedAccLogIds.forEach(aLogId => { const aLog = db.accessoryLogs.find(x => x.id === aLogId); if(aLog) { const acc = db.accessories.find(x=>x.id===aLog.accId); usedStr += `<br>${aLog.qty}x ${acc?acc.name:''}`; } }); } 
+                tbody.innerHTML += `<tr><td>${l.date}</td><td><b>${mName}</b></td><td>+${l.qty}</td><td style="font-size:11px;">${usedStr}</td><td><button class="btn-danger" style="padding:4px 8px;" onclick="cancelProduction('${l.id}')">İptal</button></td></tr>`; 
+            }); 
+        } 
+        document.getElementById('productionHistoryModal').style.display = 'flex'; 
+    }
+    function cancelProduction(id) { if(!confirm("Üretimi iptal etmek istediğinize emin misiniz?")) return; const pLog = db.productionLogs.find(x => x.id === id); if(!pLog) return; if(pLog.relatedAccLogIds && pLog.relatedAccLogIds.length > 0) { db.accessoryLogs = db.accessoryLogs.filter(log => !pLog.relatedAccLogIds.includes(log.id)); } db.productionLogs = db.productionLogs.filter(x => x.id !== id); saveDB(); openProductionHistory(); refreshUI(); }
+
     function createNewLocation() { const n = document.getElementById('new-loc-name').value; if(n) { db.locations.push({id: 'LOC-'+Date.now(), name: n.trim()}); saveDB(); document.getElementById('new-loc-name').value = ''; refreshUI(); } }
-    
-    function quickLocationSale(locId) {
-        const qInput = document.getElementById(`q-sale-qty-${locId}`);
-        const pInput = document.getElementById(`q-sale-price-${locId}`);
-        const q = parseInt(qInput.value); const p = parseFloat(pInput.value) || 0;
-        
-        if(isNaN(q) || q <= 0) return alert("Geçerli bir adet girin!");
-        
-        let totalProduced = 0; db.productionLogs.forEach(l => totalProduced += l.qty);
-        let totalSold = 0; 
-        db.locationLogs.filter(l => l.type === 'SALE').forEach(l => totalSold += l.qty);
-        db.locationLogs.filter(l => l.type === 'RETURN').forEach(l => totalSold -= l.qty);
-        
-        const currentStock = totalProduced - totalSold;
-        if(q > currentStock) return alert(`Hata: Depoda sadece ${currentStock} adet ürün kaldı!`);
+    function toggleAccordion(id) { const x = document.getElementById(id); x.style.display = (x.style.display === "none" || x.style.display === "") ? "block" : "none"; }
+    function cancelLocationLog(logId) { if(confirm("İPTAL etmek istediğinize emin misiniz? Düşülen stok geri yüklenir.")) { db.locationLogs = db.locationLogs.filter(x => x.id !== logId); saveDB(); refreshUI(); } }
 
-        const d = new Date().toISOString().slice(0,10);
-        db.locationLogs.push({ id: 'LLOG-'+Date.now(), timestamp: Date.now(), date: d, locId: locId, type: 'SALE', qty: q, price: p });
-        
-        qInput.value = ''; pInput.value = '';
-        saveDB(); refreshUI();
-    }
-
-    function toggleAccordion(id) {
-        const x = document.getElementById(id);
-        if (x.style.display === "none" || x.style.display === "") { x.style.display = "block"; } else { x.style.display = "none"; }
-    }
-
-    function cancelLocationLog(logId) {
-        if(!confirm("İşlemi İPTAL edip stoğu ve kasayı geri almak istediğinize emin misiniz?")) return;
-        db.locationLogs = db.locationLogs.filter(x => x.id !== logId); saveDB(); refreshUI();
-    }
-
-    // EKRAN YENİLEME FONKSİYONU
     function refreshUI() {
-        // --- 1. HAMMADDE (KART GÖRÜNÜMÜ) ---
-        const ms = document.getElementById('log-mat-select'); ms.innerHTML = '<option value="">-Seç-</option>'; 
-        const it = document.getElementById('inventory-list'); it.innerHTML = ''; 
-        let totalRawValue = 0; let totalWasteLoss = 0; let filIn = 0; let filOut = 0;
-
-        db.materials.forEach(m => { 
-            const u = m.unit || 'gr'; ms.innerHTML += `<option value="${m.id}" data-unit="${u}">${m.name}</option>`; 
-            const st = calculateMaterialStats(m.id); totalRawValue += (st.stock * st.avgCost); 
-            const alertLimit = m.alertLimit || 0; const isCritical = st.stock <= alertLimit; 
-            
-            const badgeHTML = isCritical ? `<span class="badge badge-danger">⚠️ Kritik</span>` : ''; 
-            const topColor = m.color && m.color !== 'transparent' ? m.color : '#ccc';
-
-            // Kalınlaştırılmış Şerit: border-top: 18px solid
-            it.innerHTML += `
-            <div class="mat-card" style="border-top: 18px solid ${topColor};">
-                <div>
-                    <div class="mat-card-header">
-                        <span>${m.name}</span>
-                        ${badgeHTML}
-                    </div>
-                    <div class="mat-card-stock">
-                        ${parseFloat(st.stock).toFixed(2)} <span style="font-size:13px; color:#7f8c8d; font-weight:normal;">${u.toUpperCase()}</span>
-                    </div>
-                    <div style="font-size:12px; color:#7f8c8d; margin-bottom:10px;">Ort. Maliyet: <b>${st.avgCost.toFixed(3)} ₺</b></div>
-                    <div style="display:flex; gap:4px; margin-bottom:5px;">
-                        <input type="text" inputmode="decimal" class="num-input" id="q-mat-qty-${m.id}" placeholder="Adet/Gr" style="width:100%; padding:6px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
-                        <input type="text" inputmode="decimal" class="num-input" id="q-mat-price-${m.id}" placeholder="Tutar(₺)" style="width:70px; padding:6px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
-                        <button class="btn-success" style="padding:6px 10px; font-size:12px;" onclick="quickAddStock('${m.id}')">Al</button>
-                    </div>
-                </div>
-                <div class="mat-card-actions">
-                    <button class="btn-info" style="flex:1; padding:4px; font-size:12px; min-height:0;" onclick="openMaterialHistory('${m.id}')">🕒</button>
-                    <button class="btn-warning" style="flex:1; padding:4px; font-size:12px; min-height:0;" onclick="editMaterial('${m.id}')">✏️</button>
-                    <button class="btn-danger" style="flex:1; padding:4px; font-size:12px; min-height:0;" onclick="deleteMaterial('${m.id}')">🗑️</button>
-                </div>
-            </div>`; 
-            
-            if(u === 'gr') {
-                db.stockLogs.filter(l => l.matId === m.id).forEach(l => {
-                    if(l.type === 'IN') filIn += l.qty;
-                    if(l.type === 'OUT') filOut += l.qty;
-                });
-            }
-        });
+        const fStats = getGlobalFilamentStats();
+        document.getElementById('global-fil-current').innerText = fStats.currentStock.toFixed(2) + " gr";
+        document.getElementById('global-fil-avg-cost').innerText = fStats.avgCostPerGram.toFixed(3) + " ₺";
         
-        document.getElementById('mat-total-current').innerText = (filIn - filOut).toFixed(2) + " gr";
-        document.getElementById('mat-total-used').innerText = filOut.toFixed(2) + " gr";
-        db.wasteLogs.forEach(w => { totalWasteLoss += w.cost; });
-
-        // --- 2. ÜRÜNLER (KART GÖRÜNÜMÜ) ---
-        let totalProduced = 0; let productProductionMap = {}; db.products.forEach(p => productProductionMap[p.id] = 0);
-        let totalCostOfAllProductions = 0;
-
-        db.productionLogs.forEach(l => {
-            totalProduced += l.qty;
-            if(productProductionMap[l.prodId] !== undefined) { productProductionMap[l.prodId] += l.qty; }
-            const pr = db.products.find(p => p.id === l.prodId);
-            if(pr) {
-                let uCost = 0; pr.recipe.forEach(i => { uCost += calculateMaterialStats(i.matId).avgCost * i.qty; });
-                totalCostOfAllProductions += (uCost * l.qty);
-            }
-        });
-
-        let totalSold = 0; let b2bTotalRevenue = 0;
-        db.locationLogs.forEach(l => {
-            if(l.type === 'SALE') { totalSold += l.qty; b2bTotalRevenue += (l.price || 0); } 
-            else if(l.type === 'RETURN') { totalSold -= l.qty; b2bTotalRevenue -= (l.price || 0); }
-        });
-        
-        let currentGlobalStock = totalProduced - totalSold;
-
-        document.getElementById('stock-total-produced').innerText = totalProduced + " Adet";
-        document.getElementById('stock-total-sold').innerText = totalSold + " Adet";
-        document.getElementById('stock-current').innerText = currentGlobalStock + " Adet";
-
-        const plc = document.getElementById('product-list-container'); plc.innerHTML = ''; 
-        const term = (document.getElementById('product-search-input')?.value || '').toLowerCase(); 
-
-        let sortedProducts = [...db.products].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
-
-        sortedProducts.forEach(p => {
-            if (!p.name.toLowerCase().includes(term) && !(p.code && p.code.toLowerCase().includes(term))) return; 
-
-            let tc = 0; let recipeDotsHTML = '';
-            p.recipe.forEach(i => { 
-                const matCost = calculateMaterialStats(i.matId).avgCost; tc += (matCost * i.qty); 
-                const mat = db.materials.find(m => m.id === i.matId); const matName = mat ? mat.name : 'Silinmiş'; const unit = mat ? (mat.unit || 'gr') : 'gr'; 
-                const cColor = mat && mat.color && mat.color !== 'transparent' ? mat.color : '#ccc';
-                
-                recipeDotsHTML += `<div style="display:flex; align-items:center; gap:3px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${cColor}; border:1px solid #ddd;"></span> ${matName} (${i.qty}${unit})</div>`;
-            });
-            
-            const pQty = productProductionMap[p.id] || 0;
-            let codeHTML = p.code ? `<span class="prod-code-badge">${p.code}</span>` : '';
-
-            plc.innerHTML += `
-            <div class="prod-card">
-                <div class="prod-title-area">
-                    <div class="prod-title">${p.name}</div>
-                    <div style="margin-top:4px;">${codeHTML}</div>
+        const alc = document.getElementById('accessory-list-container'); alc.innerHTML = '';
+        let totalAccExpense = 0; let totalAccValueInStock = 0;
+        db.accessories.forEach(acc => {
+            let stock = 0; let totalPaid = 0; let totalInQty = 0;
+            db.accessoryLogs.filter(l => l.accId === acc.id).forEach(l => { if(l.type === 'IN') { stock += l.qty; totalPaid += l.price; totalInQty += l.qty; totalAccExpense += l.price; } if(l.type === 'OUT') stock -= l.qty; });
+            let avgPrice = totalInQty > 0 ? (totalPaid / totalInQty) : 0; totalAccValueInStock += (stock * avgPrice);
+            alc.innerHTML += `
+            <div class="acc-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;">
+                    <b style="font-size:16px; color:var(--primary);">${acc.name}</b>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-outline" style="padding:4px 8px; font-size:11px;" onclick="openAccHistory('${acc.id}')">📜 Geçmiş</button>
+                        <button class="btn-outline" style="padding:4px 8px; font-size:11px; border-color:#e74c3c; color:#e74c3c;" onclick="deleteAccessory('${acc.id}')">Sil</button>
+                    </div>
                 </div>
-                
-                <div style="font-size:11px; font-weight:bold; color:var(--secondary); margin-bottom:5px;">Reçete Renkleri:</div>
-                <div class="prod-recipe-dots">${recipeDotsHTML}</div>
-                
-                <div class="prod-stats-row">
-                    <div>Maliyet:<br><b style="color:var(--danger)">${tc.toFixed(2)} ₺</b></div>
-                    <div style="text-align:right;">Toplam Üretim:<br><b style="color:var(--info); font-size:14px;">${pQty} Adet</b></div>
-                </div>
-
-                <div class="prod-produce-box">
-                    <input type="text" inputmode="decimal" class="num-input" id="q-prod-qty-list-${p.id}" placeholder="Adet" style="width:60px; padding:6px; font-size:13px; border:1px solid #ccc; border-radius:4px; text-align:center;">
-                    <button class="btn-success" style="padding:6px 12px; font-size:13px;" onclick="quickProduce('${p.id}')">⚙️ Hızlı Üret</button>
-                </div>
-
-                <div style="display:flex; gap:4px; margin-top:auto;">
-                    <button class="btn-purple" style="flex:1; padding:6px; font-size:11px;" onclick="cloneProduct('${p.id}')">📑 Kopya</button>
-                    <button class="btn-warning" style="flex:1; padding:6px; font-size:11px;" onclick="editProduct('${p.id}')">✏️ Düz.</button>
-                    <button class="btn-danger" style="flex:1; padding:6px; font-size:11px;" onclick="deleteProduct('${p.id}')">🗑️ Sil</button>
+                <div style="text-align:center; font-size:24px; font-weight:bold; color:var(--purple);">${stock} Adet</div>
+                <div style="text-align:center; font-size:13px; color:#7f8c8d; margin-bottom:15px; margin-top:5px;">Ort. Maliyet: <b style="color:var(--danger);">${avgPrice.toFixed(2)} ₺</b></div>
+                <div class="acc-actions">
+                    <div style="font-size:12px; font-weight:bold; color:#7f8c8d; margin-bottom:5px;">📥 Stok Ekle</div>
+                    <div style="display:flex; gap:6px;">
+                        <input type="text" class="num-input" id="acc-in-qty-${acc.id}" placeholder="Adet" style="width:50%; padding:8px;">
+                        <input type="text" class="num-input" id="acc-in-price-${acc.id}" placeholder="Tutar(₺)" style="width:50%; padding:8px;">
+                        <button class="btn-success" style="padding:8px 12px; font-size:12px;" onclick="addAccStock('${acc.id}')">Al</button>
+                    </div>
                 </div>
             </div>`;
         });
 
-        // --- 3. BAYİLER ---
-        const lc = document.getElementById('locations-container'); lc.innerHTML = '';
-        let dealerAnalytics = [];
+        let producedMap = {}; db.productionLogs.forEach(l => { producedMap[l.modelId] = (producedMap[l.modelId]||0) + l.qty; });
+        let soldMap = {}; db.locationLogs.forEach(l => { if(l.type === 'SALE' && l.items) { l.items.forEach(i => { soldMap[i.modelId] = (soldMap[i.modelId]||0) + i.qty; }); } });
+        
+        let totalProduced = 0; let totalSold = 0; let totalProductionCostValue = 0; let totalProductionExpectedSalesValue = 0;
+        
+        db.productionLogs.forEach(l => { totalProduced += l.qty; totalProductionCostValue += l.costAssigned; const mod = db.models.find(x => x.id === l.modelId); if(mod) totalProductionExpectedSalesValue += (l.qty * (mod.sellPrice || 0)); });
+        let totalRevenue = 0; db.locationLogs.forEach(l => { if(l.type === 'SALE') { totalSold += l.qty; totalRevenue += l.price; } });
+        let currentGlobalStock = totalProduced - totalSold;
+        document.getElementById('stock-total-produced').innerText = totalProduced + " Adet"; document.getElementById('stock-total-sold').innerText = totalSold + " Adet"; document.getElementById('stock-current').innerText = currentGlobalStock + " Adet";
 
+        const plc = document.getElementById('product-list-container'); plc.innerHTML = ''; 
+        const sortedModels = db.models.slice().sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+        
+        sortedModels.forEach(m => {
+            const pQty = producedMap[m.id] || 0;
+            const sQty = soldMap[m.id] || 0;
+            const currentMStock = pQty - sQty;
+
+            let codeHTML = m.code ? `<span class="prod-code-badge">${m.code}</span>` : '';
+            let rInfo = `<span style="display:inline-block; background:#f0f3f4; padding:2px 6px; border-radius:4px; margin-right:4px; margin-bottom:4px;">🧵 ${m.filGr} gr</span>`;
+            
+            let unitCost = m.filGr * fStats.avgCostPerGram;
+            if(m.recipe) { m.recipe.forEach(r => { const a = db.accessories.find(x=>x.id===r.accId); if(a) rInfo += `<span style="display:inline-block; background:#f4f0f4; padding:2px 6px; border-radius:4px; margin-right:4px; margin-bottom:4px; color:var(--purple);">🔗 ${r.qty}x ${a.name}</span>`; let aIn=0, aPaid=0; db.accessoryLogs.filter(l=>l.accId===r.accId && l.type==='IN').forEach(l=>{aIn+=l.qty; aPaid+=l.price;}); let aAvg = aIn>0 ? (aPaid/aIn) : 0; unitCost += (r.qty * aAvg); }); }
+            
+            let sPrice = m.sellPrice || 0;
+            let marginHTML = '';
+            if(unitCost > 0 && sPrice > unitCost) {
+                let margin = ((sPrice - unitCost) / unitCost) * 100;
+                marginHTML = `<div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background-color:#8e44ad; color:#ffffff; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:bold; white-space:nowrap; box-shadow:0 4px 6px rgba(0,0,0,0.2); border: 2px solid #fff; z-index:10;">%${margin.toFixed(0)} NET KÂR</div>`;
+            }
+
+            let priceBoxes = `
+            <div style="position:relative; margin-top:15px; margin-bottom:15px;">
+                ${marginHTML}
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1; background:#fdf2e9; padding:12px 8px; border-radius:6px; text-align:center; border: 1px solid #fadbd8;">
+                        <div style="font-size:11px; color:var(--danger); font-weight:bold;">BİRİM MALİYET</div>
+                        <div style="font-size:16px; color:var(--danger); font-weight:bold;">${unitCost.toFixed(2)} ₺</div>
+                    </div>
+                    <div style="flex:1; background:#f0f9f4; padding:12px 8px; border-radius:6px; text-align:center; border: 1px solid #c3e6cb;">
+                        <div style="font-size:11px; color:var(--success); font-weight:bold;">SATIŞ FİYATI</div>
+                        <div style="font-size:16px; color:var(--success); font-weight:bold;">${sPrice.toFixed(2)} ₺</div>
+                    </div>
+                </div>
+            </div>`;
+
+            let totalProducedHTML = `<div style="text-align:right; font-size:11px; color:#95a5a6; margin-bottom:10px;">Bugüne kadar üretilen: <b>${pQty} Adet</b></div>`;
+
+            plc.innerHTML += `
+            <div class="prod-card prod-card-item">
+                <div class="prod-title-area">
+                    <div class="prod-title">${m.name}</div>
+                    <div style="margin-top:6px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>${codeHTML}</div>
+                        <div style="background:var(--success); color:white; padding:4px 10px; border-radius:6px; font-weight:bold; font-size:13px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">📦 STOK: ${currentMStock}</div>
+                    </div>
+                </div>
+                ${priceBoxes}
+                <div style="font-size:11px; color:#555; margin-bottom:10px; min-height:30px;">${rInfo}</div>
+                ${totalProducedHTML}
+                <button class="btn-success" style="padding:12px; font-size:16px; margin-bottom:10px; box-shadow: 0 2px 8px rgba(39,174,96,0.3);" onclick="openProduceModal('${m.id}')">⚙️ Hızlı Üret</button>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn-warning" style="flex:1; padding:8px; font-size:12px;" onclick="editModel('${m.id}')">✏️ Düzenle</button>
+                    <button class="btn-danger" style="flex:1; padding:8px; font-size:12px;" onclick="deleteModel('${m.id}')">🗑️ Sil</button>
+                </div>
+            </div>`;
+        });
+        filterProducts();
+
+        let dealerRevMap = {}; let modelSoldStats = {};
+        const lc = document.getElementById('locations-container'); lc.innerHTML = '';
+        
         db.locations.forEach(loc => {
             let sentQty = 0; let locRev = 0;
             let locLogs = db.locationLogs.filter(log => log.locId === loc.id).sort((a,b) => b.timestamp - a.timestamp);
             
-            locLogs.forEach(log => {
-                if(log.type === 'SALE') { sentQty += log.qty; locRev += (log.price || 0); }
-                if(log.type === 'RETURN') { sentQty -= log.qty; locRev -= (log.price || 0); }
-            });
-
-            if(sentQty > 0 || locRev > 0) dealerAnalytics.push({name: loc.name, count: sentQty, rev: locRev});
-
-            let formHTML = `
-            <div style="background:#f8f9fa; padding:10px; border-radius:8px; border:1px solid #e1e8ed; margin-top:10px;">
-                <div style="display:flex; gap:6px;">
-                    <input type="text" inputmode="decimal" class="num-input" id="q-sale-qty-${loc.id}" style="width:60px; padding:8px; font-size:13px; border:1px solid #ccd1d9; border-radius:6px; text-align:center;" placeholder="Adet">
-                    <input type="text" inputmode="decimal" class="num-input" id="q-sale-price-${loc.id}" style="flex:1; padding:8px; font-size:13px; border:1px solid #ccd1d9; border-radius:6px; text-align:center;" placeholder="Toplam (₺)">
-                    <button class="btn-success" style="padding:8px 12px; min-height:0; font-size:13px;" onclick="quickLocationSale('${loc.id}')">Sat</button>
-                </div>
-            </div>`;
-
             let accID = `acc-${loc.id}`;
-            let historyHTML = `
-            <div style="margin-top:10px;">
-                <button class="btn-outline" style="width:100%; padding:6px; font-size:11px;" onclick="toggleAccordion('${accID}')">📜 Geçmiş İşlemleri Gör / Gizle</button>
-                <div id="${accID}" class="accordion-content">
-                    <table style="width:100%; font-size:11px; margin-top:5px;">
-                        <thead><tr style="background:#eee;"><th>Tarih</th><th>İşlem</th><th>Adet</th><th>Tutar</th><th>Sil</th></tr></thead>
-                        <tbody>`;
+            let historyHTML = `<div style="margin-top:12px;"><button class="btn-outline" style="width:100%; padding:8px; font-size:13px;" onclick="toggleAccordion('${accID}')">📜 Sipariş Geçmişini Gör</button><div id="${accID}" class="accordion-content"><table style="width:100%; font-size:12px; margin-top:8px;"><thead><tr style="background:#eee;"><th>Tarih</th><th>Adet / Detay</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody>`;
+            if(locLogs.length === 0) historyHTML += `<tr><td colspan="4" style="text-align:center; padding:12px;">Henüz sipariş yok.</td></tr>`;
             
-            if(locLogs.length === 0) historyHTML += `<tr><td colspan="5" style="text-align:center; padding:10px;">İşlem yok.</td></tr>`;
-            
-            locLogs.forEach(l => {
-                let t = l.type === 'SALE' ? '<span style="color:var(--success)">Satış</span>' : '<span style="color:var(--danger)">İade</span>';
-                historyHTML += `<tr>
-                    <td style="padding:4px;">${l.date}</td>
-                    <td style="padding:4px;">${t}</td>
-                    <td style="padding:4px;"><b>${l.qty}</b></td>
-                    <td style="padding:4px;">${(l.price||0).toFixed(2)} ₺</td>
-                    <td style="padding:4px;"><button class="btn-danger" style="padding:2px 6px; min-height:0; font-size:10px;" onclick="cancelLocationLog('${l.id}')">X</button></td>
-                </tr>`;
+            locLogs.forEach(l => { 
+                if(l.type === 'SALE') { 
+                    sentQty += l.qty; locRev += l.price; 
+                    let detailsStr = '';
+                    if(l.items && l.items.length > 0) {
+                        let parts = l.items.map(i => {
+                            modelSoldStats[i.modelId] = (modelSoldStats[i.modelId]||0) + i.qty; 
+                            let m = db.models.find(x=>x.id===i.modelId); return `${i.qty}x ${m?m.name:'Silinmiş'}`;
+                        });
+                        detailsStr = `<div style="font-size:10px; color:#7f8c8d; margin-top:4px; font-weight:normal;">Detay: ${parts.join(', ')}</div>`;
+                    }
+
+                    historyHTML += `<tr>
+                        <td style="padding:6px 4px; vertical-align:top; border-bottom:1px solid #eee;">${l.date}</td>
+                        <td style="padding:6px 4px; border-bottom:1px solid #eee;"><b>${l.qty}</b>${detailsStr}</td>
+                        <td style="padding:6px 4px; vertical-align:top; color:var(--success); font-weight:bold; border-bottom:1px solid #eee;">${l.price.toFixed(2)} ₺</td>
+                        <td style="padding:6px 4px; vertical-align:top; border-bottom:1px solid #eee;">
+                            <button class="btn-warning" style="padding:4px 8px; min-height:0; font-size:11px; margin-bottom:4px; display:block; width:100%; box-shadow:0 2px 4px rgba(0,0,0,0.1);" onclick="editLocationLog('${l.id}')">Düzenle</button>
+                            <button class="btn-danger" style="padding:4px 8px; min-height:0; font-size:11px; display:block; width:100%; box-shadow:0 2px 4px rgba(0,0,0,0.1);" onclick="cancelLocationLog('${l.id}')">Sil</button>
+                        </td>
+                    </tr>`; 
+                } 
             });
-            
             historyHTML += `</tbody></table></div></div>`;
+            dealerRevMap[loc.name] = locRev;
 
-            lc.innerHTML += `
-            <div class="card" style="padding:15px; display:flex; flex-direction:column; justify-content:flex-start; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
-                <h3 style="margin-top:0; margin-bottom:15px; color:var(--primary); border-bottom:1px solid #eee; padding-bottom:10px;">🏬 ${loc.name}</h3>
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
-                    <span style="color:#7f8c8d;">Verilen Anahtarlık:</span><b style="color:var(--info); font-size:16px;">${sentQty} Adet</b>
-                </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
-                    <span style="color:#7f8c8d;">Kazanılan Tutar:</span><b style="color:var(--success); font-size:16px;">${locRev.toFixed(2)} ₺</b>
-                </div>
-                ${formHTML}
-                ${historyHTML}
-            </div>`;
+            lc.innerHTML += `<div class="dealer-card dealer-card-item"><h3 style="margin-top:0; margin-bottom:15px; color:var(--primary); border-bottom:2px solid #eee; padding-bottom:10px; font-size:18px;">🏬 ${loc.name}</h3><div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:15px;"><span style="color:#7f8c8d; font-weight:600;">Verilen Toplam Ürün:</span><b style="color:var(--info); font-size:18px;">${sentQty} Adet</b></div><div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:15px;"><span style="color:#7f8c8d; font-weight:600;">Kazanılan Tutar:</span><b style="color:var(--success); font-size:18px;">${locRev.toFixed(2)} ₺</b></div><button class="btn-warning" style="width:100%; font-size:16px; padding:12px; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);" onclick="openPosModal('${loc.id}')">🛒 YENİ SİPARİŞ OLUŞTUR</button>${historyHTML}</div>`;
         });
+        filterDealers();
 
-        // --- 4. FİNANS ---
-        let totalExpense = 0; db.stockLogs.forEach(l => { if(l.type === 'IN') totalExpense += (l.price || 0); });
-        const allRevenue = b2bTotalRevenue; 
-        const netCash = allRevenue - totalExpense; 
+        let bestDealer = "-"; let maxRev = 0; for (let d in dealerRevMap) { if(dealerRevMap[d] > maxRev) { maxRev = dealerRevMap[d]; bestDealer = d; } }
+        document.getElementById('stats-best-dealer').innerText = maxRev > 0 ? `${bestDealer} (${maxRev} ₺)` : '-';
+        let bestModel = "-"; let maxSold = 0; for (let mId in modelSoldStats) { if(modelSoldStats[mId] > maxSold) { maxSold = modelSoldStats[mId]; let m = db.models.find(x=>x.id===mId); bestModel = m ? m.name : "Silinmiş"; } }
+        document.getElementById('stats-best-model').innerText = maxSold > 0 ? `${bestModel} (${maxSold} Adet)` : '-';
+
+        let totalWasteLoss = 0; db.globalFilamentLogs.forEach(l => { if(l.type === 'WASTE') totalWasteLoss += l.cost; });
+        let totalOtherExp = (db.otherExpenses || []).reduce((sum, e) => sum + e.amount, 0);
         
-        document.getElementById('fin-total-expense').innerText = totalExpense.toFixed(2) + " ₺"; 
-        document.getElementById('fin-total-revenue').innerText = allRevenue.toFixed(2) + " ₺"; 
+        const matExpense = fStats.totalExpense + totalAccExpense;
+        const allExpenses = matExpense + totalOtherExp; 
+        const netCash = totalRevenue - allExpenses; 
+        
+        document.getElementById('fin-total-expense').innerText = allExpenses.toFixed(2) + " ₺"; 
+        document.getElementById('fin-total-revenue').innerText = totalRevenue.toFixed(2) + " ₺"; 
         document.getElementById('fin-waste-loss').innerText = "- " + totalWasteLoss.toFixed(2) + " ₺";
-        const nc = document.getElementById('fin-net-cash'); 
-        nc.innerText = netCash.toFixed(2) + " ₺"; nc.parentElement.className = 'stat-card ' + (netCash >= 0 ? 'blue' : 'red');
-
-        document.getElementById('fin-raw-value').innerText = totalRawValue.toFixed(2) + " ₺"; 
-        const avgCostPerKeychain = totalProduced > 0 ? (totalCostOfAllProductions / totalProduced) : 0;
-        const currentStockCost = currentGlobalStock * avgCostPerKeychain;
-        document.getElementById('fin-prod-cost').innerText = currentStockCost.toFixed(2) + " ₺";
         
-        let producedAnalytics = [];
-        db.products.forEach(p => { if(productProductionMap[p.id] > 0) producedAnalytics.push({name: p.name, count: productProductionMap[p.id]}); });
-        producedAnalytics.sort((a,b) => b.count - a.count);
+        const nc = document.getElementById('fin-net-cash'); nc.innerText = netCash.toFixed(2) + " ₺"; nc.parentElement.className = 'stat-card ' + (netCash >= 0 ? 'blue' : 'red');
+        
+        document.getElementById('dist-mat-exp').innerText = matExpense.toFixed(2) + " ₺";
+        document.getElementById('dist-other-exp').innerText = totalOtherExp.toFixed(2) + " ₺";
+        document.getElementById('dist-total-exp').innerText = allExpenses.toFixed(2) + " ₺";
 
-        const amp = document.getElementById('analytics-most-produced'); amp.innerHTML = '';
-        producedAnalytics.slice(0,5).forEach(p => { amp.innerHTML += `<tr><td><b>${p.name}</b></td><td><span class="badge badge-info" style="font-size:13px;">${p.count} Adet</span></td></tr>`; });
-        if(producedAnalytics.length === 0) amp.innerHTML = '<tr><td colspan="2" style="text-align:center;">Henüz üretim verisi yok.</td></tr>';
-
-        dealerAnalytics.sort((a,b) => b.rev - a.rev);
-        const atd = document.getElementById('analytics-top-dealers'); atd.innerHTML = '';
-        dealerAnalytics.slice(0,5).forEach(d => { atd.innerHTML += `<tr><td><b>${d.name}</b></td><td>${d.count} Adet</td><td><span class="badge badge-success" style="background:#2ecc71; color:white; font-size:13px;">${d.rev.toFixed(2)} ₺</span></td></tr>`; });
-        if(dealerAnalytics.length === 0) atd.innerHTML = '<tr><td colspan="3" style="text-align:center;">Henüz satış yapılmamış.</td></tr>';
+        document.getElementById('fin-raw-value').innerText = (fStats.currentStock * fStats.avgCostPerGram).toFixed(2) + " ₺"; document.getElementById('fin-acc-value').innerText = totalAccValueInStock.toFixed(2) + " ₺"; 
+        const avgCostPerKeychain = totalProduced > 0 ? (totalProductionCostValue / totalProduced) : 0; const avgSalesPricePerKeychain = totalProduced > 0 ? (totalProductionExpectedSalesValue / totalProduced) : 0;
+        const finProdCost = currentGlobalStock * avgCostPerKeychain; const finProdSalesValue = currentGlobalStock * avgSalesPricePerKeychain; const finProdExpectedProfit = finProdSalesValue - finProdCost;
+        document.getElementById('fin-prod-cost').innerText = finProdCost.toFixed(2) + " ₺"; document.getElementById('fin-prod-sales').innerText = finProdSalesValue.toFixed(2) + " ₺"; document.getElementById('fin-prod-profit').innerText = finProdExpectedProfit.toFixed(2) + " ₺";
     }
 </script>
 </body>
