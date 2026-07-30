@@ -35,7 +35,7 @@
         button:active { transform: translateY(0); }
         .btn-success { background-color: var(--success); } .btn-warning { background-color: var(--warning); color: #fff; } .btn-danger { background-color: var(--danger); } .btn-purple { background-color: var(--purple); } .btn-info { background-color: #0984e3; }
         .btn-outline { background-color: transparent; border: 2px solid var(--accent); color: var(--accent); }
-        .btn-excel { background-color: #107c41; color: white; } /* Excel Yeşili */
+        .btn-excel { background-color: #107c41; color: white; }
         
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; } .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; } .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } .container{ padding: 10px; } }
@@ -95,6 +95,7 @@
         <button class="nav-btn" id="tab-btn-finance" onclick="switchTab('finance')" style="color:var(--purple);">📊 4. Finans</button>
     </div>
 
+    <!-- SEKME 1: HAMMADDE VE AKSESUAR -->
     <div id="tab-materials">
         <div class="card" style="background:#f8f9fa;"><h2 style="margin-top:0;">🧵 Filament Havuzu</h2><div class="grid-2"><div class="stat-card blue" style="padding: 20px;"><div class="title">Kalan Filament</div><div class="value" id="global-fil-current">0 gr</div></div><div class="stat-card dark" style="padding: 20px;"><div class="title">Ortalama Maliyet</div><div class="value" id="global-fil-avg-cost">0.00 ₺</div></div></div></div>
         <div class="grid-2">
@@ -116,6 +117,7 @@
         </div>
     </div>
 
+    <!-- SEKME 2: ÜRÜNLER -->
     <div id="tab-products" style="display: none;">
         <div class="grid-3" style="margin-bottom: 20px;">
             <div class="stat-card dark" style="padding: 15px;"><div class="title">Bugüne Kadar Üretilen</div><div class="value" id="stock-total-produced">0 Adet</div></div>
@@ -143,6 +145,7 @@
         <div id="product-list-container" class="grid-3" style="margin-bottom:20px;"></div>
     </div>
 
+    <!-- SEKME 3: BAYİLER -->
     <div id="tab-locations" style="display: none;">
         <div class="grid-2" style="margin-bottom: 20px;">
             <div class="stat-card gold"><div class="title">🏆 En Çok Ciro Yapan Bayi</div><div class="value" id="stats-best-dealer" style="font-size:24px;">-</div></div>
@@ -153,6 +156,7 @@
         <div id="locations-container" class="grid-3"></div>
     </div>
 
+    <!-- SEKME 4: FİNANS -->
     <div id="tab-finance" style="display: none;">
         <h2 style="margin-top: 0;">Nakit Akışı (Toptan Peşin Model)</h2>
         <div class="grid-4" style="margin-bottom: 25px;">
@@ -197,6 +201,7 @@
     </div>
 </div>
 
+<!-- POS SEPET EKRANI MODALI -->
 <div id="posModal" class="modal">
     <div class="modal-content" style="max-width: 900px; padding:0; overflow:hidden;">
         <div class="modal-header" style="background:var(--primary); color:white; padding:15px 20px; margin:0;">
@@ -227,6 +232,27 @@
     </div>
 </div>
 
+<!-- SİPARİŞİ BAŞKA FİRMAYA AKTAR (TRANSFER) MODALI -->
+<div id="transferOrderModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3 style="margin:0; color:var(--info);">🔄 Siparişi Başka Firmaya Aktar</h3>
+            <button class="close-btn" onclick="document.getElementById('transferOrderModal').style.display='none'">✖</button>
+        </div>
+        <p style="font-size:13px; color:#7f8c8d; margin-top:0;">Bu işlem ürünleri A firmasından silip, stoğa hiç dokunmadan direkt B firmasına kaydeder.</p>
+        <div class="form-group">
+            <label>Aktarılacak Yeni Firma / Bayi</label>
+            <select id="transfer-target-loc" style="width:100%; padding:10px; border:2px solid #ccc; border-radius:6px;"></select>
+        </div>
+        <div class="form-group">
+            <label>Yeni Sipariş Tutarı (₺)</label>
+            <input type="text" inputmode="decimal" class="num-input" id="transfer-target-price" placeholder="Tutar yazın..." style="width:100%; padding:10px; border:2px solid #ccc; border-radius:6px; font-weight:bold;">
+        </div>
+        <button class="btn-info" style="width:100%; padding:12px; margin-top:10px; font-size:16px;" onclick="confirmTransferOrder()">✅ Seçili Firmaya Aktar</button>
+    </div>
+</div>
+
+<!-- DİĞER MODALLAR -->
 <div id="otherExpModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; color:var(--danger);">💸 Diğer Gider Geçmişi</h3><button class="close-btn" onclick="document.getElementById('otherExpModal').style.display='none'">✖</button></div><p style="font-size:13px; color:#7f8c8d; margin-top:0;">Buradan silinen giderler otomatik olarak kasanıza iade edilir (Nakit kasanız artar).</p><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody id="other-exp-list"></tbody></table></div></div></div>
 <div id="filHistoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; color:var(--success);">📥 Filament Alım Geçmişi</h3><button class="close-btn" onclick="document.getElementById('filHistoryModal').style.display='none'">✖</button></div><div class="table-responsive"><table><thead><tr><th>Tarih</th><th>Miktar</th><th>Tutar</th><th>İşlem</th></tr></thead><tbody id="fil-history-list"></tbody></table></div></div></div>
 <div id="produceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0; color:var(--success);">⚙️ Hızlı Üretim</h3><button class="close-btn" onclick="document.getElementById('produceModal').style.display='none'">✖</button></div><input type="hidden" id="modal-prod-id"><h4 id="modal-prod-name" style="text-align:center;"></h4><div id="modal-prod-recipe-info" style="text-align:center; font-size:13px; margin-bottom:20px;"></div><div class="form-group"><label style="text-align:center;">Kaç Adet Ürettiniz?</label><input type="text" class="num-input" id="modal-prod-qty" style="font-size:24px; text-align:center; padding:15px;"></div><button class="btn-success" onclick="confirmProduction()" style="width:100%; padding:15px;">✅ Üret ve Düş</button></div></div>
@@ -298,19 +324,16 @@
 
     function saveDB() { const s = document.getElementById('sync-status'); s.innerHTML = '🔄 Kaydediliyor...'; s.classList.remove('connected'); dbRef.set(db).then(() => { s.innerHTML = '🟢 Kaydedildi'; s.classList.add('connected'); }).catch(() => { s.innerHTML = '🔴 Hata!'; }); }
     
-    // --- MEVCUT: JSON YEDEK ALMA (Sistemi geri yüklemek için) ---
     function exportData() { 
         const a = document.createElement('a'); 
         a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2)); 
-        a.download = "Mete3D_SistemYedek_V58_" + new Date().toISOString().slice(0,10) + ".json"; 
+        a.download = "Mete3D_SistemYedek_V61_" + new Date().toISOString().slice(0,10) + ".json"; 
         document.body.appendChild(a); a.click(); a.remove(); 
     }
 
-    // --- YENİ: EXCEL ÇIKTISI ALMA (İnsanların okuması için) (V58) ---
     function exportExcel() {
         if (typeof XLSX === 'undefined') return alert('Excel kütüphanesi yüklenemedi. Lütfen internet bağlantınızı kontrol edin.');
 
-        // 1. Ürünler Tablosunu Hazırla
         const productsData = db.models.map(m => {
             let produced = 0; let sold = 0;
             db.productionLogs.filter(l => l.modelId === m.id).forEach(l => produced += l.qty);
@@ -328,7 +351,6 @@
             };
         });
 
-        // 2. Üretim Geçmişi Tablosunu Hazırla
         const productionData = db.productionLogs.map(l => {
             const m = db.models.find(x => x.id === l.modelId);
             return {
@@ -340,7 +362,6 @@
             };
         });
 
-        // 3. Bayi Satışları Tablosunu Hazırla
         const salesData = db.locationLogs.filter(l => l.type === 'SALE').map(l => {
             const loc = db.locations.find(x => x.id === l.locId);
             let detailStr = (l.items || []).map(i => {
@@ -357,24 +378,76 @@
             };
         });
 
-        // 4. Diğer Giderler Tablosunu Hazırla
         const expensesData = (db.otherExpenses || []).map(e => ({
             "Tarih": e.date,
             "Gider Açıklaması": e.desc,
             "Ödenen Tutar (₺)": e.amount
         }));
 
-        // Excel Çalışma Kitabı (Workbook) Oluştur
         const wb = XLSX.utils.book_new();
-        
-        // Verileri sayfalara (sheet) çevirip çalışma kitabına ekle
         if (productsData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productsData), "Ürün Kataloğu");
         if (productionData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productionData), "Üretim Geçmişi");
         if (salesData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salesData), "Bayi Satışları");
         if (expensesData.length > 0) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(expensesData), "Diğer Giderler");
 
-        // Dosyayı indir
         XLSX.writeFile(wb, "Mete3D_Excel_Raporu_" + new Date().toISOString().slice(0,10) + ".xlsx");
+    }
+
+    let sourceLogToTransfer = null;
+    function openTransferModal(logId) {
+        const log = db.locationLogs.find(x => x.id === logId);
+        if(!log || !log.items || log.items.length === 0) return alert('Aktarılacak ürün detayı bulunamadı.');
+        sourceLogToTransfer = log;
+
+        const select = document.getElementById('transfer-target-loc');
+        select.innerHTML = '';
+        
+        let targetExists = false;
+        db.locations.forEach(loc => {
+            if(loc.id !== log.locId) { 
+                select.innerHTML += `<option value="${loc.id}">${loc.name}</option>`;
+                targetExists = true;
+            }
+        });
+        
+        if(!targetExists) {
+            alert('Sisteme kayıtlı aktarım yapılabilecek başka bir bayi/firma bulunamadı. Lütfen önce yeni firma ekleyin.');
+            return;
+        }
+
+        document.getElementById('transfer-target-price').value = log.price;
+        document.getElementById('transferOrderModal').style.display = 'flex';
+    }
+
+    function confirmTransferOrder() {
+        if(!sourceLogToTransfer) return;
+        const targetLocId = document.getElementById('transfer-target-loc').value;
+        const price = parseFloat(document.getElementById('transfer-target-price').value) || 0;
+        if(!targetLocId) return alert('Lütfen hedef bayi seçin!');
+
+        sourceLogToTransfer.locId = targetLocId;
+        sourceLogToTransfer.price = price;
+        sourceLogToTransfer.date = new Date().toISOString().slice(0,10); 
+        sourceLogToTransfer.timestamp = Date.now();
+
+        saveDB();
+        document.getElementById('transferOrderModal').style.display = 'none';
+        refreshUI();
+        alert('Sipariş başarıyla ana stoğa dokunulmadan diğer firmaya aktarıldı!');
+    }
+
+    // --- YENİ: BAYİ/FİRMA ADI DÜZENLEME MANTIĞI (V61) ---
+    function editLocationName(locId) {
+        const loc = db.locations.find(x => x.id === locId);
+        if(!loc) return;
+        
+        const newName = prompt("Bayi/Firma için yeni bir ad girin:", loc.name);
+        
+        if(newName && newName.trim() !== "" && newName.trim() !== loc.name) {
+            loc.name = newName.trim();
+            saveDB();
+            refreshUI();
+        }
     }
 
     function switchTab(tab) { ['materials', 'products', 'locations', 'finance'].forEach(t => { document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'; document.getElementById('tab-btn-' + t).className = 'nav-btn' + (t === tab ? ' active' : ''); }); refreshUI(); }
@@ -682,6 +755,7 @@
                         <td style="padding:6px 4px; vertical-align:top; color:var(--success); font-weight:bold; border-bottom:1px solid #eee;">${l.price.toFixed(2)} ₺</td>
                         <td style="padding:6px 4px; vertical-align:top; border-bottom:1px solid #eee;">
                             <button class="btn-warning" style="padding:4px 8px; min-height:0; font-size:11px; margin-bottom:4px; display:block; width:100%; box-shadow:0 2px 4px rgba(0,0,0,0.1);" onclick="editLocationLog('${l.id}')">Düzenle</button>
+                            <button class="btn-info" style="padding:4px 8px; min-height:0; font-size:11px; margin-bottom:4px; display:block; width:100%; box-shadow:0 2px 4px rgba(0,0,0,0.1);" onclick="openTransferModal('${l.id}')">🔄 Aktar</button>
                             <button class="btn-danger" style="padding:4px 8px; min-height:0; font-size:11px; display:block; width:100%; box-shadow:0 2px 4px rgba(0,0,0,0.1);" onclick="cancelLocationLog('${l.id}')">Sil</button>
                         </td>
                     </tr>`; 
@@ -690,7 +764,13 @@
             historyHTML += `</tbody></table></div></div>`;
             dealerRevMap[loc.name] = locRev;
 
-            lc.innerHTML += `<div class="dealer-card dealer-card-item"><h3 style="margin-top:0; margin-bottom:15px; color:var(--primary); border-bottom:2px solid #eee; padding-bottom:10px; font-size:18px;">🏬 ${loc.name}</h3><div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:15px;"><span style="color:#7f8c8d; font-weight:600;">Verilen Toplam Ürün:</span><b style="color:var(--info); font-size:18px;">${sentQty} Adet</b></div><div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:15px;"><span style="color:#7f8c8d; font-weight:600;">Kazanılan Tutar:</span><b style="color:var(--success); font-size:18px;">${locRev.toFixed(2)} ₺</b></div><button class="btn-warning" style="width:100%; font-size:16px; padding:12px; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);" onclick="openPosModal('${loc.id}')">🛒 YENİ SİPARİŞ OLUŞTUR</button>${historyHTML}</div>`;
+            // YENİ: BAYİ ADI DÜZENLEME BUTONU EKLENDİ (V61)
+            lc.innerHTML += `<div class="dealer-card dealer-card-item">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:15px;">
+                    <h3 style="margin:0; color:var(--primary); font-size:18px;">🏬 ${loc.name}</h3>
+                    <button class="btn-outline" style="padding:4px 8px; font-size:11px; border-color:var(--warning); color:var(--warning);" onclick="editLocationName('${loc.id}')">✏️ Adı Değiştir</button>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:15px;"><span style="color:#7f8c8d; font-weight:600;">Verilen Toplam Ürün:</span><b style="color:var(--info); font-size:18px;">${sentQty} Adet</b></div><div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:15px;"><span style="color:#7f8c8d; font-weight:600;">Kazanılan Tutar:</span><b style="color:var(--success); font-size:18px;">${locRev.toFixed(2)} ₺</b></div><button class="btn-warning" style="width:100%; font-size:16px; padding:12px; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);" onclick="openPosModal('${loc.id}')">🛒 YENİ SİPARİŞ OLUŞTUR</button>${historyHTML}</div>`;
         });
         filterDealers();
 
